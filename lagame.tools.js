@@ -1,17 +1,14 @@
-LPArrs = new Array (
- new Array (
-  new Array({ x:0, y:-1 }, { x:1, y:0 }, { x:2, y:0 }),
-  new Array({ x:-1, y:0 }, { x:0, y:-1}, { x:0, y:-2}),
-  new Array({ x:0, y:1 }, { x:-1, y:0 }, { x:-2, y:0 }),
-  new Array({ x:1, y:0 }, { x:0, y:1 }, { x:0, y:2 })
- ),
- new Array (
-  new Array({ x:0, y:1 }, { x:1, y:0 }, { x:2, y:0 }),
-  new Array({ x:-1, y:0 }, { x:0, y:1 }, { x:0, y:2 }),
-  new Array({ x:0, y:-1 }, { x:-1, y:0 }, { x:-2, y:0 }),
-  new Array({ x:-1, y:0 }, { x:0, y:-1 }, { x:0, y:-2 })
- )
-)
+/* 
+ * Fields for all possible L-Piece positions
+ * @see LaGameGUI#setLPiece
+ * Reference point is always the edge of the L-Piece
+ */
+LPArrs = [
+  [{ x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y:-1 }], // 1. pos
+  [{ x:-1, y: 0 }, { x: 0, y:-1 }, { x: 0, y:-2 }], // 2. pos
+  [{ x: 0, y: 1 }, { x:-1, y: 0 }, { x:-2, y: 0 }], // 3. pos
+  [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }]  // 4. pos
+]
 
 /* British English */
 function realisePiece(obj) {
