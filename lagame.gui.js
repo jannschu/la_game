@@ -99,10 +99,3 @@ LaGameGUI.prototype.drawGameBoard = function() {
 /*****************************************************************************/
 /*                                PRIVATE                                    */
 /*****************************************************************************/
-
-// See lagame.tools.js for new version of this function
-// just keep this one temporary
-LaGameGUI.getFieldsForL = function(xx, yy, rotation, inversed) {
-  var fields = [{x:xx, y:yy}, {x:xx, y:yy-1}, {x:xx+1, y: yy}, {x:xx+2, y: yy}];
-  return fields;
-}
