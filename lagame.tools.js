@@ -4,28 +4,35 @@
  * Reference point is always the edge of the L-Piece
  */
 LPArrs = [
-  [{ x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y:-1 }], // 1. pos
-  [{ x:-1, y: 0 }, { x: 0, y:-1 }, { x: 0, y:-2 }], // 2. pos
-  [{ x: 0, y: 1 }, { x:-1, y: 0 }, { x:-2, y: 0 }], // 3. pos
-  [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }]  // 4. pos
+  [{ x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y:-1 }], // 0. pos
+  [{ x:-1, y: 0 }, { x: 0, y:-1 }, { x: 0, y:-2 }], // 1. pos
+  [{ x: 0, y: 1 }, { x:-1, y: 0 }, { x:-2, y: 0 }], // 2. pos
+  [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }]  // 3. pos
 ]
 
-/* British English */
-function realisePiece(obj) {
-  var retArr = new Array({ x:obj.x, y:obj.y })
-  switch (obj.type) {
+/**
+ * Returns all fields for a game piece
+ * @param {Object} point The Description of the point
+ * with property type as 'n' or 'l' for neutral and L-Piece and 'x' and 'y'.
+ * Set property 'inv' to inverse and 'rot' for different positions 
+ */
+function realisePiece(piece) {
+  var pointsForPiece = [{ x:piece.x, y:piece.y }]
+  switch (piece.type) {
     case "n":
-      return retArr
-      break
-    case "l": /* This should've been done in another way */
-      for (var c1 = 0; c1 < LPArrs[obj.inv].length; c1++) {
-        retArr.push (
-          { x:LPArrs[obj.inv][obj.rot].x+obj.x,
-            y:LPArrs[obj.inv][obj.rot].y+obj.y }
-        )
+      return pointsForPiece;
+    case "l":
+      var relativePoints = LPArrs[piece.rot];
+      var inv = piece.inv ? -1 : 1;
+      var point;
+      for (var i = 0; i < relativePoints.length; ++i) {
+        point = {
+          x: inv * relativePoints[i].x + piece.x, 
+          y: relativePoints[i].y + piece.y
+        }
+        pointsForPiece.push(point);
       }
-      return retArr /* FIXME: Need to add the LPArr vals to the obj.x/y vals [SHOULDWORKNOW] */
-      break
+      return pointsForPiece;
   }
 }
 
