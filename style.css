@@ -1,0 +1,11 @@
+@charset "utf-8";
+
+h1, h2, p {
+  text-align: center;
+}
+
+canvas {
+  display: block;
+  margin: auto;
+  margin-bottom: 3em;
+}
