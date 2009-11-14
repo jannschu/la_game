@@ -40,30 +40,33 @@ LaGamePlayer.canvasPointer = function(c) {
   }
   var x = c.offsetX;
   var y = c.offsetY;
-  var player = this.currentPlayer.playerNumber;
-  var lpieces = this.currentPlayer.logic.getLPieces();
-  var npieces = this.currentPlayer.logic.getNPieces();
-  var fields = [];
-  if (this.currentPlayer.canMoveL) 
-    fields = fields.concat(realisePiece(lpieces[player]));
-  if (this.currentPlayer.canMoveNeutral) 
-    fields = fields.concat(npieces);
-  if (LaGamePlayer.coordOverOwnGamePiece(this.currentPlayer.gui, x, y, fields)) {
+  
+  if (this.currentPlayer.coordOverOwnGamePiece(x, y)) {
     this.style.cursor = 'pointer';
   } else {
     this.style.cursor = 'default';
   }
 };
 
-LaGamePlayer.coordOverOwnGamePiece = function(gui, x, y, pieces) {
-  var field;
-  var fieldX, fieldY;
+LaGamePlayer.prototype.coordOverOwnGamePiece = function(x, y) {
+  var pieces = [];
+  if (this.canMoveNeutral) pieces = pieces.concat(this.logic.getNPieces());
+  if (this.canMoveL) pieces.push(this.logic.getLPieces()[this.playerNumber]);
+  
+  var fieldSum = this.gui.fieldSize + this.gui.border;
+  
+  var piece, fields, field;
+  var fieldX, fieldY, j;
   for (var i = 0; i < pieces.length; ++i) {
-    field = pieces[i];
-    fieldX = field.x * (gui.fieldSize + gui.border);
-    fieldY = field.y * (gui.fieldSize + gui.border);
-    if (x >= fieldX && x < fieldX + gui.fieldSize + gui.border && 
-        y >= fieldY && y < fieldY + gui.fieldSize + gui.border) return true;
+    piece = pieces[i];
+    fields = realisePiece(piece);
+    for (j = 0; j < fields.length; ++j) {
+      field = fields[j];
+      fieldX = field.x * fieldSum;
+      fieldY = field.y * fieldSum;
+      if (x >= fieldX && x < fieldX + fieldSum && 
+          y >= fieldY && y < fieldY + fieldSum) return piece;
+    }
   }
   return false;
 };
