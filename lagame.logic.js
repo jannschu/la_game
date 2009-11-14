@@ -27,8 +27,8 @@ function LaGameLogic(gui, playerA, playerB) {
   this.curPlayer = 0
   
   this.lPieces = new Array (
-    { type:"l", x:0, y:3, rot:0, inv:false },
-    { type:"l", x:2, y:2, rot:1, inv:true  }
+    { player: 0, type:"l", x:0, y:3, rot:0, inv:false },
+    { player: 1, type:"l", x:2, y:2, rot:1, inv:true  }
   )
   
   this.nPieces = new Array (
