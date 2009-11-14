@@ -5,6 +5,7 @@
   <link rel="stylesheet" href="style.css" type="text/css">
   <script type="text/javascript" src="lagame.tools.js"></script>
   <script type="text/javascript" src="lagame.gui.js"></script>
+  <script type="text/javascript" src="lagame.human-player.js"></script>
   <script type="text/javascript" src="lagame.logic.js"></script>
   <script type="text/javascript">
     window.onload = function() {
@@ -17,6 +18,10 @@
       document.getElementById('currentPlayer').style.color = gui.lColor[0];
       
       logic.initializeGame();
+      
+      // just debug, usually called from logic
+      var player = new LaGamePlayer(0, gui, logic);
+      player.startMoving(true, true, null)
     }
   </script>
   <title>La Game</title>

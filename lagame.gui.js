@@ -10,8 +10,8 @@ function LaGameGUI(canvas) {
   
   if (canvas.width != canvas.height) alert('Canvas should be quadratic');
   
-  this.boardSize = canvas.width;
-  this.fieldSize = (this.boardSize - 5 * this.border) / 4;
+  this.boardSize = canvas.width; // public
+  this.fieldSize = (this.boardSize - 5 * this.border) / 4; // public
 
   this.lColor = ['red', 'blue', 'white'];
 };
