@@ -1,12 +1,16 @@
 /* INTERFACE */
 
-/* FIXME: DEVELOPMENT NOTES :FIXME *
+/* TODO: DEVELOPMENT NOTES :TODO *
  *      WHAT HAS TO BE DONE
  *
  * - check if player can execute the move regarding this.playerCanMoveL etc. [done]
  * - discuss n piece identifier (necessary somehow) [done, nid]
  * - do this.playerCanMoveX SET && this.curPlayer SWITCH @ end of doMove()
  * - discuss whether the player HAS TO move stuff
+ * - _maybe_ some sort of finishMove() function so the player doesn't have
+ *   to put a neutral piece in its previous position when he doesn't want to
+ *   move one
+ * - nid issue in collision checking
  * - do stuff
  */
 
@@ -71,11 +75,22 @@ function LaGameLogic(gui, playerA, playerB) {
  */
 LaGameLogic.prototype.doMove = function(move) {
 
-  /* Check if player can execute the move */
-  if (move.type == "l" && this.playerCanMoveL == false) {
-    return { error:"alreadymovedl" }
+  /* Check if player can execute the move (simple conditions) */
+  
+  /* L pieces */
+  if (move.type == "l") {
+    /* Check if the move is "available" */
+    if (this.playerCanMoveL == false) {
+      return { error:"alreadymovedl" }
+    }
+    /* Check if it is, in fact, a move (i.e. not copying the old position) */
+    if (this.lPieces[this.curPlayer] == move) {
+      return { error:"nomove" }
+    }
   }
-  else if (move.type == "n" && this.playerCanMoveN == false) {
+  
+  /* N pieces */
+  if (move.type == "n" && this.playerCanMoveN == false) {
     return { error:"alreadymovedn" }
   }
 
@@ -95,8 +110,6 @@ LaGameLogic.prototype.doMove = function(move) {
   
   var realP = realisePiece(move)
   
-  /* FIXME: Implement collision check + _OUT OF BOUNDS CHECK_ :FIXME */
-  
   /* Out of bounds check */
   for (var c1 = 0; c1 < realP.length; c1++) {
     if (realP[c1].x < 0 || realP[c1].x > 3) {
@@ -107,9 +120,16 @@ LaGameLogic.prototype.doMove = function(move) {
     }
   }
   
-  /* Collision check */ /* FIXME: NEUTRAL PIECES TOO */
+  /* Collision check */
   for (var c1 = 0; c1 < realP.length; c1++) {
     
+    /*
+     * FIXME: CRITICAL :FIXME
+     *
+     * Needs restructuring; nid not taken into consideration.
+     * Completely screwed up. Outrageous.
+     *
+     */
     /* Neutral pieces */
     for (var c2 = 0; c2 < this.nPieces.length; c2++) {
       if (realP[c1].x == this.nPieces[c2].x &&
@@ -121,7 +141,7 @@ LaGameLogic.prototype.doMove = function(move) {
     /* Opponent L piece */
     for (var c2 = 0; c2 < this.realLPieces[oppPlayer].length; c2++) {
       if (realP[c1].x == this.realLPieces[oppPlayer][c2].x &&
-      realP[c1].y = this.realLPieces[oppPlayer][c2].y) {
+      realP[c1].y == this.realLPieces[oppPlayer][c2].y) {
         return { error:"collision", x:realP[c1].x, y:realP[c1].y }
       }
     }
@@ -130,11 +150,10 @@ LaGameLogic.prototype.doMove = function(move) {
      * ONLY IF A NEUTRAL PIECE IS BEING MOVED:
      * Perform check for collision with _own L piece _
      */
-    /* FIXME: COND [FIXED] */
     
     if (move.type == "n") {
     
-      for (var c2 = 0; c2 this.realLPieces[this.curPlayer].length; c2++) {
+      for (var c2 = 0; c2 < this.realLPieces[this.curPlayer].length; c2++) {
         if (realP[c1].x == this.realLPieces[this.curPlayer][c2].x &&
         realP[c1].y == this.realLPieces[this.curPlayer][c2].y) {
           return { error:"collision", x:realP[c1].x, y:realP[c1].y }
@@ -143,7 +162,7 @@ LaGameLogic.prototype.doMove = function(move) {
       
     }
     
-  } /* FIXME: IMPLEMENT SHITE FOR N PIECES (CHECKS FOR OWN L PIECE AS WELL) [FIXED] */
+  }
   
   /* Realise move */
   
@@ -152,7 +171,7 @@ LaGameLogic.prototype.doMove = function(move) {
     this.realLPieces[this.curPlayer] = realisePiece(move)
     
     this.playerCanMoveL = false
-  } /* FIXME: ADD ROUTINE FOR N PIECES [INPROGRESS] */
+  }
   else if (move.type == "n") {
     this.nPieces[move.nid] = move
     
@@ -176,9 +195,24 @@ LaGameLogic.prototype.doMove = function(move) {
   
 };
 
+/* 
+ * FIXME: Development note: before this function gets called, you have to
+ * check for winning situation etc. since afterwards the turn will be over.
+ * Just sayin'.
+ */
 LaGameLogic.prototype.switchPlayers = function() {
 
-  /* FIXME: ADD ERRCHECK HERE (e.g. if player hasn't moved L piece yet -> fail */
+  /*
+   * FIXME: ADD ERRCHECK HERE (e.g. if player hasn't moved L piece yet -> fail
+   *
+   * ...
+   *
+   * NOPE! Since you just have to check for playerCanMoveL == false and
+   * playerCanMoveN == false (not moving neutral piece -> put it where it
+   * was ) just before calling this function; that solves it. No extra 
+   * checking of any kind necessary.
+   */
+  
   if (this.curPlayer == 0) {
     this.curPlayer = 1
   }
