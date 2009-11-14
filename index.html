@@ -12,10 +12,14 @@
       document.getElementById('newGame').addEventListener('click', function() {
         return window.confirm('Wirklich das Spiel neustarten?');
       }, false);
-      var gui = new LaGameGUI(document.getElementById('laGameCanvas'));
+      
+      var playerLabel = document.getElementById('currentPlayer');
+      var canvas = document.getElementById('laGameCanvas');
+      
+      var gui = new LaGameGUI(canvas, playerLabel);
       var logic = new LaGameLogic(gui, null, null);
       
-      document.getElementById('currentPlayer').style.color = gui.lColor[0];
+      gui.setPlayerLabel('Spieler 1 beginnt', 0);
       
       logic.initializeGame();
       

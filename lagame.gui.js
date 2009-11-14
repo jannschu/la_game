@@ -4,8 +4,9 @@
  * @param {HTMLCanvasElement} canvas
  * @constructor
  */
-function LaGameGUI(canvas) {
+function LaGameGUI(canvas, playerLabel) {
   this.canvas = canvas;
+  this.playerLabel = playerLabel;
   this.border = 4;
   
   if (canvas.width != canvas.height) alert('Canvas should be quadratic');
@@ -14,6 +15,11 @@ function LaGameGUI(canvas) {
   this.fieldSize = (this.boardSize - 5 * this.border) / 4; // public
 
   this.lColor = ['red', 'blue', 'white'];
+};
+
+LaGameGUI.prototype.setPlayerLabel = function(text, player) {
+  this.playerLabel.innerHTML = text;
+  this.playerLabel.style.color = this.lColor[player];
 };
 
 /*****************************************************************************/
