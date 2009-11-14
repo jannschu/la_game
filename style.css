@@ -9,3 +9,13 @@ canvas {
   margin: auto;
   margin-bottom: 3em;
 }
+
+fieldset {
+   text-align: center;
+   width: 600px;
+   margin: auto;
+}
+
+legend {
+   text-align: left;
+}

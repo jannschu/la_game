@@ -27,13 +27,13 @@ function LaGameLogic(gui, playerA, playerB) {
   this.curPlayer = 0
   
   this.lPieces = new Array (
-    { type:"l", x:0, y:2, rot:0, inv:0 },
-    { type:"l", x:3, y:1, rot:2, inv:0 }
+    { type:"l", x:0, y:3, rot:0, inv:false },
+    { type:"l", x:2, y:2, rot:1, inv:true  }
   )
   
   this.nPieces = new Array (
-    { type:"n", nid:0, x:0, y:0 },
-    { type:"n", nid:1, x:3, y:3 }
+    { type:"n", nid:0, x:0, y:1 },
+    { type:"n", nid:1, x:1, y:2 }
   )
   
   this.playerCanMoveL = true
@@ -68,6 +68,27 @@ function LaGameLogic(gui, playerA, playerB) {
   
   
 }
+
+LaGameLogic.prototype.getLPieces = function() {
+  return this.lPieces;
+};
+
+LaGameLogic.prototype.getNPieces = function() {
+  return this.nPieces;
+}
+
+LaGameLogic.prototype.initializeGame = function() {
+  // TODO place start pieces randomly
+  this.gui.drawGameBoard();
+  var neutrals = this.getNPieces();
+  this.gui.setNeutral(neutrals[0].x, neutrals[0].y);
+  this.gui.setNeutral(neutrals[1].x, neutrals[1].y);
+  var l = this.getLPieces();
+  var l0 = l[0];
+  this.gui.setLPiece(l0.x, l0.y, l0.rot, l0.inv, 0);
+  var l1 = l[1];
+  this.gui.setLPiece(l1.x, l1.y, l1.rot, l1.inv, 1);
+};
 
 /**
  * Attempts to do a move

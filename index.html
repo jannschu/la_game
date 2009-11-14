@@ -5,23 +5,38 @@
   <link rel="stylesheet" href="style.css" type="text/css">
   <script type="text/javascript" src="lagame.tools.js"></script>
   <script type="text/javascript" src="lagame.gui.js"></script>
+  <script type="text/javascript" src="lagame.logic.js"></script>
   <script type="text/javascript">
     window.onload = function() {
+      document.getElementById('newGame').addEventListener('click', function() {
+        return window.confirm('Wirklich das Spiel neustarten?');
+      }, false);
       var gui = new LaGameGUI(document.getElementById('laGameCanvas'));
-      gui.drawGameBoard();
-      gui.setNeutral(2, 0);
-      gui.setNeutral(1, 3);
-      gui.setLPiece(2, 2, 1, true, 2);
-      // gui.unsetNeutral(1, 3);
+      var logic = new LaGameLogic(gui, null, null);
+      
+      document.getElementById('currentPlayer').style.color = gui.lColor[0];
+      
+      logic.initializeGame();
     }
   </script>
   <title>La Game</title>
 </head>
 <body>
   <h1>La Game</h1>
-  <p>The L-Game in JavaScript/Canvas.</p>
-  <h2>Steuerung</h2>
-  <p>Stein per Klick auswählen, und mit Pfeiltasten bewegen. Mit Enter umdrehen</p>
-  <canvas width="600" height="600" id="laGameCanvas"></canvas>
+  <p>Das L-Spiel in JavaScript/Canvas.</p>
+  <canvas width="400" height="400" id="laGameCanvas"></canvas>
+  <fieldset>
+    <legend>Spiel</legend>
+    <select name="versusMode" id="versusMode">
+      <option value="">Mensch gegen Mensch</option>
+    </select>
+    <input type="button" name="newGame" value="Neues Spiel" id="newGame">
+    <input type="button" name="nextPlayer" value="Nächster Spieler" disabled id="nextPlayer">
+    <p id="gameInfo">
+      <strong id="currentPlayer">Spieler 1 beginnt</strong>. Wähle die Steine per 
+      <code>Klick</code> aus, bewege sie mit den Pfeiltasten und platziere den Stein mit <code>Enter</code>.
+      Die <code>Leertaste</code> kannst du benutzen um Steine zu drehen und <code>B</code> zum Umdrehen.
+    </p>
+  </fieldset>
 </body>
 </html>
