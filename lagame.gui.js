@@ -38,8 +38,7 @@ LaGameGUI.prototype.setNeutral = function(x, y, choosing) {
   var canY = (this.border + this.fieldSize) * y + this.fieldSize / 2 + this.border;
   var ctx = this.canvas.getContext('2d');
   ctx.beginPath();
-  var alpha = choosing ? '0.4' : '1';
-  ctx.fillStyle = 'rgba(0, 0, 0, ' + alpha + ')';
+  ctx.fillStyle = choosing ? 'rgba(0, 0, 0, 0.6)' : 'black';
   ctx.arc(canX, canY, this.fieldSize / 2, 0, Math.PI * 2, true);
   ctx.fill();
 };
@@ -70,13 +69,14 @@ LaGameGUI.prototype.setLPiece = function(x, y, rotation, inversed, player, choos
   
   var ctx = this.canvas.getContext('2d');
   ctx.fillStyle = this.lColor[player];
-  
+  if (choosing) ctx.globalAlpha = 0.5
   var canX, canY;
   for(var i = 0; i < fields.length; ++i) {
     canX = (this.border + this.fieldSize) * fields[i].x + this.border;
     canY = (this.border + this.fieldSize) * fields[i].y + this.border;
     ctx.fillRect(canX, canY, this.fieldSize, this.fieldSize);
   }
+  ctx.globalAlpha = 1;
 };
 /**
  * @see #setLPiece
