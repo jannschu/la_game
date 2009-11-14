@@ -132,14 +132,14 @@ LaGameLogic.prototype.doMove = function(move) {
   var realP = realisePiece(move)
   
   /* Out of bounds check */
-  for (var c1 = 0; c1 < realP.length; c1++) {
+  /*for (var c1 = 0; c1 < realP.length; c1++) {
     if (realP[c1].x < 0 || realP[c1].x > 3) {
       return { error:"outofbounds", x:realP[c1].x }
     }
     if (realP[c1].y < 0 || realP[c1].y > 3) {
       return { error:"outofbounds", y:realP[c1].y }
     }
-  }
+  }*/
   
   /* Collision check */
   for (var c1 = 0; c1 < realP.length; c1++) {
