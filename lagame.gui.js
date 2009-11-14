@@ -63,7 +63,7 @@ LaGameGUI.prototype.setLPiece = function(x, y, rotation, inversed, player, choos
   var fields = realisePiece({x:x, y:y, rot:rotation, inv:inversed, type:"l"});
   
   var ctx = this.canvas.getContext('2d');
-  ctx.fillStyle = this.lColor[player - 1];
+  ctx.fillStyle = this.lColor[player];
   
   var canX, canY;
   for(var i = 0; i < fields.length; ++i) {
@@ -77,7 +77,7 @@ LaGameGUI.prototype.setLPiece = function(x, y, rotation, inversed, player, choos
  * @see #unsetNeutral
  */
 LaGameGUI.prototype.unsetLPiece = function(x, y, rotation, inversed) {
-  this.setLPiece(x, y, rotation, inversed, 3);
+  this.setLPiece(x, y, rotation, inversed, 2);
 };
 
 /**
