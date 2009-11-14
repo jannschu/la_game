@@ -28,7 +28,6 @@ LaGamePlayer.prototype.startMoving = function(l, neutral, callback) {
 LaGamePlayer.prototype.registerEvents = function() {
   this.gui.canvas.currentPlayer = this;
   document.currentPlayer = this;
-  
   this.gui.canvas.addEventListener('mousemove', LaGamePlayer.canvasPointer, false);
   this.gui.canvas.addEventListener('click', LaGamePlayer.choosePiece, false);
   document.addEventListener('keydown', LaGamePlayer.gameKeyEvent, false);
@@ -45,13 +44,15 @@ LaGamePlayer.choosePiece = function(e) {
     this.currentPlayer.unregisterEvents();
     return;
   }
-   if (this.currentPlayer.movingPiece) return;
-   var piece = this.currentPlayer.coordOverOwnGamePiece(e.offsetX, e.offsetY);
-   if (piece) {
-     this.currentPlayer.movingPiece = piece;
-     this.currentPlayer.gui.canvas.style.cursor = 'default';
-     this.currentPlayer.drawGameBoard();
-   }
+  if (this.currentPlayer.movingPiece) return;
+  var x = e.pageX - this.offsetLeft;
+  var y = e.pageY - this.offsetTop;
+  var piece = this.currentPlayer.coordOverOwnGamePiece(x, y);
+  if (piece) {
+    this.currentPlayer.movingPiece = piece;
+    this.currentPlayer.gui.canvas.style.cursor = 'default';
+    this.currentPlayer.drawGameBoard();
+  }
 };
 
 LaGamePlayer.gameKeyEvent = function(e) {
@@ -60,20 +61,21 @@ LaGamePlayer.gameKeyEvent = function(e) {
     return;
   }
   var mp = this.currentPlayer.movingPiece;
-  switch (e.keyIdentifier) {
-    case 'Enter': 
+  //console.log(e.keyCode);
+  switch (e.keyCode) {
+    case 13: // Enter
       
       break;
-    case 'U+0020':
+    case 32: // Space bar
       LaGamePlayer.rotateLPiece(mp);
-      break; // space bar
-    case 'U+0042':
+      break;
+    case 66: // B
       if (mp.type == 'l') mp.inv = !mp.inv;
-      break; // B
-    case 'Right': mp.x += 1; break;
-    case 'Left': mp.x -= 1; break;
-    case 'Up': mp.y -= 1; break;
-    case 'Down': mp.y += 1; break;
+      break;
+    case 39: mp.x += 1; break; // Right
+    case 37: mp.x -= 1; break; // Left
+    case 38: mp.y -= 1; break; // Up
+    case 40: mp.y += 1; break; // Down
   }
   var mods = LaGamePlayer.moveOutOfBoxPiece(mp);
   mp.x += mods.x;
@@ -86,7 +88,6 @@ LaGamePlayer.rotateLPiece = function(piece) {
   switch (piece.rot) {
     case 0:
       piece.rot = 1;
-      console.log(piece)
       piece.x += inv ? -1 : 2;
       break;
     case 1:
@@ -124,8 +125,8 @@ LaGamePlayer.canvasPointer = function(c) {
     this.removeEventListener('mousemove', LaGamePlayer.canvasPointer, false);
     return;
   }
-  var x = c.offsetX;
-  var y = c.offsetY;
+  var x = c.pageX - this.offsetLeft;
+  var y = c.pageY - this.offsetTop;
   
   if (this.currentPlayer.coordOverOwnGamePiece(x, y)) {
     this.style.cursor = 'pointer';
