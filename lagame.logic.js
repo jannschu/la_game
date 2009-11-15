@@ -86,6 +86,7 @@ LaGameLogic.prototype.initializeGame = function() {
   this.gui.setLPiece(l0.x, l0.y, l0.rot, l0.inv, 0);
   var l1 = l[1];
   this.gui.setLPiece(l1.x, l1.y, l1.rot, l1.inv, 1);
+  
 };
 
 /**
@@ -225,10 +226,7 @@ LaGameLogic.prototype.hasWon = function() {
       outp += field[c1][c2] + " "
     }
     outp += "\n"
-  }
-  
-  alert(outp)
-    
+  }    
   
   /* Empty horizontal fields */
   var hempty = new Array()
