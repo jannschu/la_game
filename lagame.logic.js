@@ -73,13 +73,19 @@ LaGameLogic.prototype.initializeGame = function() {
 /**
  * Checks if a move could be executed without actually executing it
  * @param {MoveObject} move Move to check for validity
+ * @param {FieldsArray} cachedRealMove Optional realised move (-> fields)
  */
 /* FIXME: Implement zero-overhead (realising piece here and in doMove atm) */
-LaGameLogic.prototype.isValidMove = function(move)
+LaGameLogic.prototype.isValidMove = function(move, cachedRealMove)
 {
 
   var result
-  var realisedMove = realisePiece(move)
+  if (cachedRealMove != null) {
+    var realisedMove = cachedRealMove
+  }
+  else {
+    var realisedMove = realisePiece(move)
+  }
   
   result = this.checkMoveAtAll(move)
   
@@ -153,9 +159,86 @@ LaGameLogic.prototype.doMove = function(move) {
     this.switchPlayers()
   }
 
-  return { error:"none" } /* FIXME: MAYBE 0, DISCUSS */
+  return { error:"none" }
   
-};
+}
+
+/**
+ * Checks if the current player has won
+ */
+LaGameLogic.prototype.hasWon = function() {
+
+  if (this.playerCanMoveL != false) {
+    return "lnotmovedyet"
+  }
+  
+  /* FIXME: build function out of this */
+  /* Actual check starts here */
+  
+  /* Realise all of the pieces except for the player's L piece */
+  /* FIXME: Implement zero-overhead */
+  var realisedFields = new Array()
+  realisedFields = realisedFields.concat(
+    realisePiece(this.LPieces[makeOpposite(this.curPlayer)])
+  )
+  realisedFields = realisedFields.concat(this.nPieces[0])
+  realisedFields = realisedFields.concat(this.nPieces[1])
+  
+  /* Fill a field containing all those fields */
+  var field = new Array()
+  
+  /* Initialize that field */
+  for (var c1 = 0; c1 < 4; c1++) {
+    for (var c2 = 0; c2 < 4; c2++) {
+      field[c1][c2] = 0
+    }
+  }
+  
+  /* Set the piece-occupied fields to 1 */
+  for (var c1 = 0; c1 < realisedFields.length; c1++) {
+    field[realisedFields[c1].x][realisedFields[c1].y] = 1
+  }
+  
+  /* Empty horizontal fields */
+  var hempty = new Array()
+  
+  /* Empty vertical fields */
+  var vempty = new Array()
+  
+  /* Stub positions relative to the 1st L field for horizontal alignment */
+  var stubX = [ { x:0, y:-1 }, { x:0, y:1 },
+                 { x:3, y:-1 }, { x:3, y:1 } ]
+  
+  /* Stub positions relative to the 1st L field for vertical alignment */
+  var stubY = [ { x:-1, y:0 }, { x:1, y:0 },
+                 { x:-1, y:3 }, { x:1, y:3 } ]
+  
+  /* Vertical loop */
+  for (var c1 = 0; c1 < 4; c1++) {
+    /* Horizontal loop */
+    for (var c2 = 0; c2 < 4; c2++) {
+      if (field[c1][c2] == 0) {
+        /* If found an empty position, add that position to the empty lists */
+        hempty.push({ x:c1, y:c2 })
+        vempty.push({ x:c1, y:c2 })
+      }
+      else if (field[c1][c2] == 1) {
+        /* If found an occupied position before a list's len > 3, remove */
+        hempty = new Array()
+        vempty = new Array()
+      }
+      if (hempty.length == 3) {
+        /* Go through all the stubs */
+        for (var c3 = 0; c3 < stubX.length; c3++) {
+          if (field[hempty[0].x+stubX.x][hempty[0].y+stubX.y] == 1) {
+            alert("Great succes: found L!")
+          }
+        }
+      }
+    }
+  }
+
+}
 
 /**
  * Attempts to finish the current player's turn
@@ -167,6 +250,9 @@ LaGameLogic.prototype.finishTurn = function() {
   }
   
   this.switchPlayers()
+  
+  /* So I said: "We don't need your so-called elegance [...]" */
+  this.players[this.curPlayer].stopMoving()
   
   return { error:"none" }
 
@@ -240,7 +326,7 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
      */
     
     /* We'll need that */
-    oppPlayer = makeOpposite(this.curPlayer)
+    var oppPlayer = makeOpposite(this.curPlayer)
     
     candidates = candidates.concat(realisePiece(this.lPieces[oppPlayer]))
     candidates = candidates.concat(this.nPieces)
@@ -253,10 +339,10 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
      */
     
     /* We'll need that */
-    otherN = makeOpposite(move.nid)
+    var otherN = makeOpposite(move.nid)
     
-    candidates = candidates.concat(this.lPieces[0])
-    candidates = candidates.concat(this.lPieces[1])
+    candidates = candidates.concat(realisePiece(this.lPieces[0]))
+    candidates = candidates.concat(realisePiece(this.lPieces[1]))
     candidates.push(this.nPieces[otherN])
     
   }
