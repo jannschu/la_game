@@ -29,7 +29,7 @@
 function LaGameLogic(gui, playerA, playerB) {
   this.gui = gui
   
-  this.players = new Array(playerA, playerB)
+  this.players = new Array(new playerA(0, gui, this), new playerB(1, gui, this))
   this.curPlayer = 0
   
   this.lPieces = new Array (

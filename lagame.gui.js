@@ -4,9 +4,10 @@
  * @param {HTMLCanvasElement} canvas
  * @constructor
  */
-function LaGameGUI(canvas, playerLabel) {
+function LaGameGUI(canvas, playerLabel, nextPlayerButton) {
   this.canvas = canvas;
   this.playerLabel = playerLabel;
+  this.nextPlayerButton = nextPlayerButton;
   this.border = 4;
   
   if (canvas.width != canvas.height) alert('Canvas should be quadratic');
@@ -20,6 +21,10 @@ function LaGameGUI(canvas, playerLabel) {
 LaGameGUI.prototype.setPlayerLabel = function(text, player) {
   this.playerLabel.innerHTML = text;
   this.playerLabel.style.color = this.lColor[player];
+};
+
+LaGameGUI.prototype.setCanFinishTurn = function(bool) {
+  this.nextPlayerButton.disabled = !bool;
 };
 
 /*****************************************************************************/
