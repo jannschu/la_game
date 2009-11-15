@@ -12,6 +12,11 @@ function LaGamePlayer(playerNumber, gui, logic) {
 };
 
 LaGamePlayer.prototype.startMoving = function(l, neutral, callback) {
+  if (this.gui.getCurrentPlayerForLabel() != this.playerNumber) 
+    this.gui.setPlayerLabel("Spieler " + (this.playerNumber + 1) + " ist dran",
+      this.playerNumber
+    )
+  
   this.canMoveL = !!l;
   this.canMoveNeutral = !!neutral;
   this.endMoveCallback = callback;

@@ -7,6 +7,7 @@
 function LaGameGUI(canvas, playerLabel, nextPlayerButton) {
   this.canvas = canvas;
   this.playerLabel = playerLabel;
+  this.currentPlayer = null;
   this.nextPlayerButton = nextPlayerButton;
   this.border = 4;
   
@@ -21,6 +22,11 @@ function LaGameGUI(canvas, playerLabel, nextPlayerButton) {
 LaGameGUI.prototype.setPlayerLabel = function(text, player) {
   this.playerLabel.innerHTML = text;
   this.playerLabel.style.color = this.lColor[player];
+  this.currentPlayer = player;
+};
+
+LaGameGUI.prototype.getCurrentPlayerForLabel = function() {
+  return this.currentPlayer;
 };
 
 LaGameGUI.prototype.setCanFinishTurn = function(bool) {
