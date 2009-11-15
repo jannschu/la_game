@@ -1,5 +1,3 @@
-/* INTERFACE */
-
 /* TODO: DEVELOPMENT NOTES :TODO *
  *      WHAT HAS TO BE DONE
  *
@@ -11,8 +9,16 @@
  *   to put a neutral piece in its previous position when he doesn't want to
  *   move one
  * - nid issue in collision checking
+ * - player can move npiece only _after_ having moved his lpiece
  * - do stuff
  */
+
+
+/* ************************************************************************ */
+
+/* INTERFACE */
+
+/* ************************************************************************ */
 
 /**
  * Controls the whole game
@@ -40,33 +46,7 @@ function LaGameLogic(gui, playerA, playerB) {
   this.playerCanMoveN = true
   
   this.isEnded = false
-  
-  /* WARNING: HERE BE DRAGONS */
-  /*this.field = new Array(16)
-  
-  var realisedP
-  
-  for (var c1 = 0; c1 < this.lPieces.length; c1++) {
-  
-    realisedP = realisePiece(this.lPieces[c1])
-  
-    for (var c2 = 0; c2 < realisedP.length; c2++) {
-      
-      this.field[ mapCToA(realisedP) ] = {
-        type:this.lPieces[c1].type, player:c1
-      }
     
-    }
-  
-  }*/
-  
-  this.realLPieces = new Array (
-    realisePiece(this.lPieces[0]),
-    realisePiece(this.lPieces[1])
-  )
-  
-  
-  
 }
 
 LaGameLogic.prototype.getLPieces = function() {
@@ -91,7 +71,40 @@ LaGameLogic.prototype.initializeGame = function() {
 };
 
 /**
- * Attempts to do a move
+ * Checks if a move could be executed without actually executing it
+ * @param {MoveObject} move Move to check for validity
+ */
+/* FIXME: Implement zero-overhead (realising piece here and in doMove atm) */
+LaGameLogic.prototype.isValidMove = function(move)
+{
+
+  var result
+  var realisedMove = realisePiece(move)
+  
+  result = this.checkMoveAtAll(move)
+  
+  if (result.error != "none") {
+    return result
+  }
+  
+  result = this.checkOutOfBounds(realisedMove)
+  
+  if (result.error != "none") {
+    return result
+  }
+  
+  result = this.checkCollisions(move, realisedMove)
+  
+  if (result.error != "none") {
+    return result
+  }
+  
+  return { error:"none" }
+
+}
+
+/**
+ * Attempts to execute a move
  * @param {MoveObject} move Move to attempt to do
  */
 LaGameLogic.prototype.doMove = function(move) {
@@ -111,111 +124,167 @@ LaGameLogic.prototype.doMove = function(move) {
   }
   
   /* N pieces */
-  if (move.type == "n" && this.playerCanMoveN == false) {
-    return { error:"alreadymovedn" }
+  if (move.type == "n") {
+    if (this.playerCanMoveN == false) {
+      return { error:"alreadymovedn" }
+    }
+    if (this.playerCanMoveL == true) { /* FIXME: discuss! */
+      return { error:"lnotmovedyet" }
+    }
   }
 
-  /*
-   * I wrote this, then wrote something else, and now I have forgotten why I
-   * need this stuff.
-   * So I'll just keep it until I know what to do.
-   *
-   * Found it :) (see below)
-   */
-  if (this.curPlayer == 0) {
-    oppPlayer = 1
-  }
-  else {
-    oppPlayer = 0
+  var result
+  
+  result = this.isValidMove(move)
+  
+  if (result.error != "none") {
+    return result
   }
   
-  var realP = realisePiece(move)
-  
-  /* Out of bounds check */
-  /*for (var c1 = 0; c1 < realP.length; c1++) {
-    if (realP[c1].x < 0 || realP[c1].x > 3) {
-      return { error:"outofbounds", x:realP[c1].x }
-    }
-    if (realP[c1].y < 0 || realP[c1].y > 3) {
-      return { error:"outofbounds", y:realP[c1].y }
-    }
-  }*/
-  
-  /* Collision check */
-  for (var c1 = 0; c1 < realP.length; c1++) {
-    
-    /*
-     * FIXME: CRITICAL :FIXME
-     *
-     * Needs restructuring; nid not taken into consideration.
-     * Completely screwed up. Outrageous.
-     *
-     */
-    /* Neutral pieces */
-    for (var c2 = 0; c2 < this.nPieces.length; c2++) {
-      if (realP[c1].x == this.nPieces[c2].x &&
-      realP[c1].y == this.nPieces[c2].y) {
-        return { error:"collision", x:realP[c1].x, y:realP[c1].y }
-      }
-    }
-    
-    /* Opponent L piece */
-    for (var c2 = 0; c2 < this.realLPieces[oppPlayer].length; c2++) {
-      if (realP[c1].x == this.realLPieces[oppPlayer][c2].x &&
-      realP[c1].y == this.realLPieces[oppPlayer][c2].y) {
-        return { error:"collision", x:realP[c1].x, y:realP[c1].y }
-      }
-    }
-    
-    /* 
-     * ONLY IF A NEUTRAL PIECE IS BEING MOVED:
-     * Perform check for collision with _own L piece _
-     */
-    
-    if (move.type == "n") {
-    
-      for (var c2 = 0; c2 < this.realLPieces[this.curPlayer].length; c2++) {
-        if (realP[c1].x == this.realLPieces[this.curPlayer][c2].x &&
-        realP[c1].y == this.realLPieces[this.curPlayer][c2].y) {
-          return { error:"collision", x:realP[c1].x, y:realP[c1].y }
-        }
-      }
-      
-    }
-    
-  }
-  
-  /* Realise move */
-  
+  /* Actually execute the move, also setting the playerCan* vars */
   if (move.type == "l") {
-    this.lPieces[this.curPlayer] = move
-    this.realLPieces[this.curPlayer] = realisePiece(move)
-    
+    this.lPieces[curPlayer] = move
     this.playerCanMoveL = false
   }
-  else if (move.type == "n") {
+  else if (move.type == "n")
+  {
     this.nPieces[move.nid] = move
-    
     this.playerCanMoveN = false
   }
   
-  /* If the player can't move pieces anymore, it's the other player's turn */
+  /* If both playerCan* vars are false, it's the other player's turn */
   if (this.playerCanMoveL == false && this.playerCanMoveN == false) {
     this.switchPlayers()
   }
-  
+
   return { error:"none" } /* FIXME: MAYBE 0, DISCUSS */
-  
-  /*
-   * FIXME: One has to wonder though: WTF? The effort it takes to check _all
-   * of the f-ing field is _necessarily_ more than the one you had when
-   * just checking pieces. F. I'll fix it tomorrow.
-   *
-   * [FIXED, I guess]
-   */
   
 };
 
+/**
+ * Attempts to finish the current player's turn
+ */
+LaGameLogic.prototype.finishTurn = function() {
+
+  if (this.playerCanMoveL == true) {
+    return { error:"lnotmovedyet" }
+  }
+  
+  this.switchPlayers()
+  
+  return { error:"none" }
+
+}
+
+/* ************************************************************************ */
+
+/* PRIVATE */
+
+/* ************************************************************************ */
+
+/**
+ * Checks if any of the fields are out of bounds and returns those which are
+ * @param {FieldArray} fields The fields you want to check
+ */
+LaGameLogic.prototype.checkOutOfBounds = function(fields) {
+
+  var overLapFields = new Array()
+  /* FIXME maybe: what if both x and y are screwed up? -> duplicate entry */
+  for (var c1 = 0; v1 < fields.length; c1++) {
+    if (fields.x > 3 || fields.x < 0) {
+      retVal.overLapFields.push({ where:"x", x:fields.x, y:fields.y })
+    }
+    if (fields.y > 3 || fields.y < 0) {
+      retVal.overLapFields.push({ where:"y", x:fields.x, y:fields.y })
+    }    
+  }
+
+  if (overLapFields.length != 0) {
+    return { error:"outofbounds", fields:overLapFields }
+  }
+  
+  return { error:"none" }
+
+}
+
+/**
+ * Checks if a given L piece move actually changes its position
+ * @param {MoveObject} move The L piece move to check for validity
+ */
+LaGameLogic.prototype.checkMoveAtAll = function(move) {
+
+  if (
+  move.x == this.lPieces[this.curPlayer].x &&
+  move.y == this.lPieces[this.curPlayer].y &&
+  move.rot == this.lPieces[this.curPlayer].rot &&
+  move.inv == this.lPieces[this.curPlayer].inv
+  ) {
+  
+    return { error:"nomove" }
+  }
+  
+  return { error:"none" }
+
+}
+
+/**
+ * Checks if the given fields collide with anything on the field
+ * @param {MoveObject} move The piece's object representation
+ * @param {FieldsArray} fields The piece's fields representation
+ */
+LaGameLogic.prototype.checkCollisions = function(move, fields) {
+
+  /* First determine the fields with which the moved piece could collide. */
+  var candidates = new Array();
+  
+  if (move.type == "l") {
+    /* 
+     * If it's a L piece, it could collide with the opponent's L piece and
+     * both N pieces.
+     */
+    
+    /* We'll need that */
+    oppPlayer = makeOpposite(this.curPlayer)
+    
+    candidates.concat(realisePiece(this.lPieces[oppPlayer]))
+    candidates.concat(this.nPieces)
+  }
+  else if (move.type == "n") {
+    /*
+     * If it's a N piece, it could collide with both L pieces and the other
+     * N piece.
+     */
+    
+    /* We'll need that */
+    otherN = makeOpposite(move.nid)
+    
+    candidates.concat(this.lPieces[0])
+    candidates.concat(this.lPieces[1])
+    candidates.push(this.nPieces[otherN])
+    
+  }
+  
+  /* This neat array will store all colliding fields */
+  var collidingFields = new Array()
+  
+  /* Now go through the fields and candidates, checking for collisions. */
+  for (var c1 = 0; c1 < fields.length; c1++) {
+    for (var c2 = 0; c2 < candidates.length; c2++) {
+    
+      if (fields.x == candidates[c1].x && fields.y == candidates[c1].y) {
+        collidingFields.push(fields[c1])
+      }
+    
+    }
+  }
+
+  if (collidingFields.length != 0) {
+    return { error:"collision", fields:collidingFields }
+  }
+  
+  return { error:"none" }
+
+}
 /* 
  * FIXME: Development note: before this function gets called, you have to
  * check for winning situation etc. since afterwards the turn will be over.

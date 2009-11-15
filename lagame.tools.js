@@ -36,6 +36,19 @@ function realisePiece(piece) {
   }
 }
 
+/* Make opposite of param (0 if param 1, 1 if param 0) */
+function makeOpposite(of) {
+  if (of == 1) {
+    return 0
+  }
+  else if (of == 0) {
+    return 1
+  }
+  else {
+    throw("wtf are you doing? (calling makeOpposite() with neither 0 nor 1)")
+  }
+}
+
 /* Map coords to array index */
 function mapCToA(obj) {
   return obj.y*4 + obj.x
