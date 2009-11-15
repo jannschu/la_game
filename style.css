@@ -1,3 +1,5 @@
+@charset "utf-8";
+
 /*
  * This file is part of La Game.
  * Copyright 2009 Shahriar Heidrich and Jannik Schürg
@@ -15,8 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with La Game.  If not, see <http://www.gnu.org/licenses/>. 
  */
-
-@charset "utf-8";
 
 h1, h2, p {
   text-align: center;
