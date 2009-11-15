@@ -179,12 +179,16 @@ LaGameLogic.prototype.doMove = function(move) {
     this.playerCanMoveN = false
   }
   
+  this.players[this.curPlayer].stopMoving();
+  
+  if (!this.playerCanMoveL && this.playerCanMoveN) {
+    this.gui.setCanFinishTurn(true);
+  }
+  
   /* If both playerCan* vars are false, it's the other player's turn */
   if (this.playerCanMoveL == false && this.playerCanMoveN == false) {
     this.switchPlayers()
   }
-  
-  this.players[this.curPlayer].stopMoving();
   
   /* In any case, the current player will have to do a move */
   var logic = this;
@@ -374,6 +378,12 @@ LaGameLogic.prototype.finishTurn = function() {
   
   this.switchPlayers()
   
+  var logic = this;
+  this.players[this.curPlayer].startMoving(
+    this.playerCanMoveL, this.playerCanMoveN,
+    function(newPiece) { logic.doMove(newPiece) }
+  )
+  
   return { error:"none" }
 
 }
@@ -518,6 +528,8 @@ LaGameLogic.prototype.switchPlayers = function() {
   {
     this.curPlayer = 0
   }
+  
+  this.gui.setCanFinishTurn(false);
   
   this.playerCanMoveL = true
   this.playerCanMoveN = true
