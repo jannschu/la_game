@@ -49,32 +49,23 @@ LaGamePlayer.choosePiece = function(e) {
   var y = e.pageY - this.offsetTop;
   var piece = this.currentPlayer.coordOverOwnGamePiece(x, y);
   if (piece) {
-    /*
-     * FIXME: discuss: need to make copy of piece so the logic's piece
-     * doesn't get changed when simulating movement
-     */
-     
-    /* Old line: */
-    /*this.currentPlayer.movingPiece = piece; */
-    /* FIXME: Debug code following */
-    /* h4xd stuff: */
-    this.currentPlayer.movingPiece = {
-      type:piece.type, x:piece.x, y:piece.y
-    }
-    if (piece.type == "l") {
-      this.currentPlayer.movingPiece.rot = piece.rot,
-      this.currentPlayer.movingPiece.inv = piece.inv
-      this.currentPlayer.movingPiece.player = piece.player
-    }
-    else if (piece.type == "n") {
-      this.currentPlayer.movingPiece.nid = piece.nid
-    }
-    /* end of h4x */
-    /* FIXME: Debug code ends here */
-    
+    this.currentPlayer.movingPiece = LaGamePlayer.copyPiece(piece);
     this.currentPlayer.gui.canvas.style.cursor = 'default';
     this.currentPlayer.drawGameBoard();
   }
+};
+
+LaGamePlayer.copyPiece = function(piece) {
+  var newPiece = {type:piece.type, x:piece.x, y:piece.y};
+  if (piece.type == "l") {
+    newPiece.rot = piece.rot,
+    newPiece.inv = piece.inv
+    newPiece.player = piece.player
+  }
+  else if (piece.type == "n") {
+    newPiece.nid = piece.nid
+  }
+  return newPiece;
 };
 
 LaGamePlayer.gameKeyEvent = function(e) {
