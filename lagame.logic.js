@@ -507,10 +507,6 @@ LaGameLogic.prototype.switchPlayers = function() {
    * checking of any kind necessary.
    */
   
-  if (this.hasWon() == true) {
-    alert("Spieler " + this.curPlayer + " hat verloren.")
-  }
-  
   if (this.curPlayer == 0) {
     this.curPlayer = 1
   }
@@ -521,6 +517,10 @@ LaGameLogic.prototype.switchPlayers = function() {
   
   this.playerCanMoveL = true
   this.playerCanMoveN = true
-
+  
+  if (this.hasWon() == true) {
+    alert("Sie (Spieler Numero " + (this.curPlayer+1) + ") haben verloren.")
+  }
+  
 }
 
