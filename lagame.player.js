@@ -108,8 +108,12 @@ LaGamePlayer.gameKeyEvent = function(e) {
     case 13: // Enter
       if (!mp) return;
       if (!this.logic.isValidMove(mp)) return;
-      if (this.currentPlayer.endMoveCallback)
-        this.currentPlayer.endMoveCallback(mp);
+      var callback = this.currentPlayer.endMoveCallback;
+      if (callback) {
+        window.setTimeout(function() {
+          callback(mp);
+        }, 0);
+      }
       this.currentPlayer.stopMoving();
       break;
     case 32: // Space bar
