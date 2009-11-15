@@ -168,9 +168,9 @@ LaGameLogic.prototype.doMove = function(move) {
  */
 LaGameLogic.prototype.hasWon = function() {
 
-  if (this.playerCanMoveL != false) {
+  /*if (this.playerCanMoveL != false) {
     return "lnotmovedyet"
-  }
+  }*/
   
   /* FIXME: build function out of this */
   /* Actual check starts here */
@@ -179,7 +179,7 @@ LaGameLogic.prototype.hasWon = function() {
   /* FIXME: Implement zero-overhead */
   var realisedFields = new Array()
   realisedFields = realisedFields.concat(
-    realisePiece(this.LPieces[makeOpposite(this.curPlayer)])
+    realisePiece(this.lPieces[makeOpposite(this.curPlayer)])
   )
   realisedFields = realisedFields.concat(this.nPieces[0])
   realisedFields = realisedFields.concat(this.nPieces[1])
@@ -189,6 +189,7 @@ LaGameLogic.prototype.hasWon = function() {
   
   /* Initialize that field */
   for (var c1 = 0; c1 < 4; c1++) {
+    field[c1] = new Array()
     for (var c2 = 0; c2 < 4; c2++) {
       field[c1][c2] = 0
     }
@@ -196,8 +197,20 @@ LaGameLogic.prototype.hasWon = function() {
   
   /* Set the piece-occupied fields to 1 */
   for (var c1 = 0; c1 < realisedFields.length; c1++) {
-    field[realisedFields[c1].x][realisedFields[c1].y] = 1
+    field[realisedFields[c1].y][realisedFields[c1].x] = 1
   }
+  
+  /* FIXME: Debug code */
+  var outp = ""
+  for (var c1 = 0; c1 < field.length; c1++) {
+    for (var c2 = 0; c2 < field[c1].length; c2++) {
+      outp += field[c1][c2] + " "
+    }
+    outp += "\n"
+  }
+  
+  alert(outp)
+    
   
   /* Empty horizontal fields */
   var hempty = new Array()
@@ -205,38 +218,114 @@ LaGameLogic.prototype.hasWon = function() {
   /* Empty vertical fields */
   var vempty = new Array()
   
+  /* Will contain the complete Ls found */
+  var completeL = new Array()
+  
   /* Stub positions relative to the 1st L field for horizontal alignment */
   var stubX = [ { x:0, y:-1 }, { x:0, y:1 },
-                 { x:3, y:-1 }, { x:3, y:1 } ]
+                 { x:2, y:-1 }, { x:2, y:1 } ]
   
   /* Stub positions relative to the 1st L field for vertical alignment */
   var stubY = [ { x:-1, y:0 }, { x:1, y:0 },
-                 { x:-1, y:3 }, { x:1, y:3 } ]
+                 { x:-1, y:2 }, { x:1, y:2 } ]
   
+  /* TODO: Restructure;
+   * Remark: though of course it would be nicer, 
+   * the effort one has to take
+   * in order to do it all in one
+   * is worth doing it in two loops.
+   */
+  
+  /* Horizontal check */
   /* Vertical loop */
   for (var c1 = 0; c1 < 4; c1++) {
     /* Horizontal loop */
+    hempty = new Array() /* has to be reset to avoid multiline lines */
     for (var c2 = 0; c2 < 4; c2++) {
       if (field[c1][c2] == 0) {
         /* If found an empty position, add that position to the empty lists */
-        hempty.push({ x:c1, y:c2 })
-        vempty.push({ x:c1, y:c2 })
+        hempty.push({ y:c1, x:c2 })
       }
       else if (field[c1][c2] == 1) {
         /* If found an occupied position before a list's len > 3, remove */
         hempty = new Array()
-        vempty = new Array()
       }
-      if (hempty.length == 3) {
+      if (hempty.length == 3) { /* horizontal candidates found */
         /* Go through all the stubs */
         for (var c3 = 0; c3 < stubX.length; c3++) {
-          if (field[hempty[0].x+stubX.x][hempty[0].y+stubX.y] == 1) {
-            alert("Great succes: found L!")
+          if (hempty[0].y+stubX[c3].y < 0 || hempty[0].y+stubX[c3].y > 3
+          || hempty[0].x+stubX[c3].x < 0 || hempty[0].x+stubX[c3].x > 3) {
+            continue;
+          }
+          if (field[hempty[0].y+stubX[c3].y][hempty[0].x+stubX[c3].x] == 0) {
+            /* Stub empty as well; complete L found! */
+            completeL = completeL.concat(hempty)
+            completeL.push({
+              x:hempty[0].x+stubX[c3].x,
+              y:hempty[0].y+stubX[c3].y
+            })
+            /* Now check if the complete L equals the own L piece */
+            if (isSameL(this.lPieces[this.curPlayer], completeL) == false) {
+              /* No winrar */
+              return false
+            }
+            completeL = new Array()
+            
           }
         }
-      }
+        hempty = new Array()
+        /* Go back one step in case it's like [ 0 0 0 0 ] */
+        c2--
+      } /* end of horizontal candidate */
+
     }
   }
+  
+  /* Vertical check */
+  /* Horizontal loop */
+  for (var c1 = 0; c1 < 4; c1++) {
+    /* Vertical loop */
+    vempty = new Array() /* has to be reset to avoid multiline lines */
+    for (var c2 = 0; c2 < 4; c2++) {
+      if (field[c2][c1] == 0) {
+        /* If found an empty position, add that position to the empty lists */
+        vempty.push({ y:c2, x:c1 })
+      }
+      else if (field[c2][c1] == 1) {
+        /* If found an occupied position before a list's len > 3, remove */
+        vempty = new Array()
+      }
+
+      if (vempty.length == 3) { /* vertical candidates found */
+        /* Go through all the stubs */
+        for (var c3 = 0; c3 < stubX.length; c3++) {
+          if (vempty[0].y+stubY[c3].y < 0 || vempty[0].y+stubY[c3].y > 3
+          || vempty[0].x+stubY[c3].x < 0 || vempty[0].x+stubY[c3].x > 3) {
+            continue;
+          }
+          if (field[vempty[0].y+stubY[c3].y][vempty[0].x+stubY[c3].x] == 0) {
+            /* Stub empty as well; complete L found! */
+            completeL = completeL.concat(vempty)
+            completeL = completeL.push({
+              x:vempty[0].x+stubX[c3].x,
+              y:vempty[0].y+stubX[c3].y
+            })
+            /* Now check if the complete L equals the own L piece */
+            if (isSameL(this.lPieces[this.curPlayer], completeL) == false) {
+              /* No winrar */
+              return false
+            }
+            completeL = new Array()
+          }
+        }
+        c2--
+        vempty = new Array()
+      } /* end of vertical candidate */
+
+    }
+  }
+
+  return true
 
 }
 

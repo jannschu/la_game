@@ -36,6 +36,35 @@ function realisePiece(piece) {
   }
 }
 
+/**
+ * Checks if the L piece specified will form the fields specified
+ * @param {Piece} lPiece L piece
+ * @param {Fields} fields Fields to compare the L piece to
+ */
+function isSameL(lPiece, fields) {
+
+  var realP = realisePiece(lPiece)
+  
+  var isRepresented = true
+  var allRepresented = true
+  
+  /* We can't ensure the order is the same in both; sucks, I know */
+  for (var c1 = 0; c1 < realP.length; c1++) {
+    isRepresented = false
+    for (var c2 = 0; c2 < fields.length; c2++) {
+      if (realP[c1].x == fields[c2].x && realP[c1].y == fields[c2].y) {
+        isRepresented = true
+      }
+    }
+    if (isRepresented != true) {
+      allRepresented = false
+    }
+  }
+  
+  return allRepresented
+
+}
+
 /* Return the opposite of param (0 if param 1, 1 if param 0) */
 function makeOpposite(of) {
   if (of == 1) {
