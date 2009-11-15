@@ -87,6 +87,11 @@ LaGameLogic.prototype.initializeGame = function() {
   var l1 = l[1];
   this.gui.setLPiece(l1.x, l1.y, l1.rot, l1.inv, 1);
   
+  /* Request move from player */
+  this.players[this.curPlayer].startMoving(
+    this.playerCanMoveL, this.playerCanMoveN,
+    function(newPiece) { logic.doMove(newPiece) }
+  )
 };
 
 /**
@@ -177,6 +182,12 @@ LaGameLogic.prototype.doMove = function(move) {
   if (this.playerCanMoveL == false && this.playerCanMoveN == false) {
     this.switchPlayers()
   }
+
+  /* In any case, the current player will have to do a move */
+  this.players[this.curPlayer].startMoving(
+    this.playerCanMoveL, this.playerCanMoveN,
+    function(newPiece) { logic.doMove(newPiece) }
+  )
 
   return { error:"none" }
   
@@ -354,10 +365,10 @@ LaGameLogic.prototype.finishTurn = function() {
     return { error:"lnotmovedyet" }
   }
   
-  this.switchPlayers()
-  
   /* So I said: "We don't need your so-called elegance [...]" */
   this.players[this.curPlayer].stopMoving()
+  
+  this.switchPlayers()
   
   return { error:"none" }
 
@@ -491,6 +502,10 @@ LaGameLogic.prototype.switchPlayers = function() {
    * was ) just before calling this function; that solves it. No extra 
    * checking of any kind necessary.
    */
+  
+  if (this.hasWon() == true) {
+    alert("Spieler " + this.curPlayer + " hat verloren.")
+  }
   
   if (this.curPlayer == 0) {
     this.curPlayer = 1
