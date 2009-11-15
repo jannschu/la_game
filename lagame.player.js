@@ -106,7 +106,8 @@ LaGamePlayer.gameKeyEvent = function(e) {
   var mp = this.currentPlayer.movingPiece;
   switch (e.keyCode) {
     case 13: // Enter
-      if (!mp) break;
+      if (!mp) return;
+      if (!this.logic.isValidMove(mp)) return;
       if (this.currentPlayer.endMoveCallback)
         this.currentPlayer.endMoveCallback(mp);
       this.currentPlayer.stopMoving();
