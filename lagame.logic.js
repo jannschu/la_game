@@ -88,6 +88,7 @@ LaGameLogic.prototype.initializeGame = function() {
   this.gui.setLPiece(l1.x, l1.y, l1.rot, l1.inv, 1);
   
   /* Request move from player */
+  var logic = this;
   this.players[this.curPlayer].startMoving(
     this.playerCanMoveL, this.playerCanMoveN,
     function(newPiece) { logic.doMove(newPiece) }
@@ -169,7 +170,7 @@ LaGameLogic.prototype.doMove = function(move) {
   
   /* Actually execute the move, also setting the playerCan* vars */
   if (move.type == "l") {
-    this.lPieces[curPlayer] = move
+    this.lPieces[this.curPlayer] = move
     this.playerCanMoveL = false
   }
   else if (move.type == "n")
@@ -182,13 +183,16 @@ LaGameLogic.prototype.doMove = function(move) {
   if (this.playerCanMoveL == false && this.playerCanMoveN == false) {
     this.switchPlayers()
   }
-
+  
+  this.players[this.curPlayer].stopMoving();
+  
   /* In any case, the current player will have to do a move */
+  var logic = this;
   this.players[this.curPlayer].startMoving(
     this.playerCanMoveL, this.playerCanMoveN,
     function(newPiece) { logic.doMove(newPiece) }
   )
-
+  
   return { error:"none" }
   
 }

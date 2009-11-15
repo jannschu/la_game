@@ -107,14 +107,13 @@ LaGamePlayer.gameKeyEvent = function(e) {
   switch (e.keyCode) {
     case 13: // Enter
       if (!mp) return;
-      if (!this.logic.isValidMove(mp)) return;
+      if (!this.currentPlayer.logic.isValidMove(mp)) return;
       var callback = this.currentPlayer.endMoveCallback;
       if (callback) {
         window.setTimeout(function() {
           callback(mp);
         }, 0);
       }
-      this.currentPlayer.stopMoving();
       break;
     case 32: // Space bar
       LaGamePlayer.rotateLPiece(mp);
