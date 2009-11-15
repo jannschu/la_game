@@ -21,6 +21,13 @@ LaGamePlayer.prototype.startMoving = function(l, neutral, callback) {
   this.registerEvents();
 };
 
+LaGamePlayer.prototype.stopMoving = function() {
+  this.unregisterEvents();
+  this.doingMove = false;
+  this.movingPiece = null;
+  this.drawGameBoard();
+};
+
 /*****************************************************************************/
 /*                                PRIVATE                                    */
 /*****************************************************************************/
@@ -74,16 +81,21 @@ LaGamePlayer.gameKeyEvent = function(e) {
     return;
   }
   var mp = this.currentPlayer.movingPiece;
-  //console.log(e.keyCode);
   switch (e.keyCode) {
     case 13: // Enter
-      
+      if (!mp) break;
+      if (this.currentPlayer.endMoveCallback)
+        this.currentPlayer.endMoveCallback(mp);
+      this.currentPlayer.stopMoving();
       break;
     case 32: // Space bar
       LaGamePlayer.rotateLPiece(mp);
       break;
     case 66: // B
-      if (mp.type == 'l') mp.inv = !mp.inv;
+      LaGamePlayer.inverseHorizontally(mp);
+      break;
+    case 86: // V
+      LaGamePlayer.inverseVertically(mp);
       break;
     case 39: mp.x += 1; break; // Right
     case 37: mp.x -= 1; break; // Left
@@ -94,6 +106,26 @@ LaGamePlayer.gameKeyEvent = function(e) {
   mp.x += mods.x;
   mp.y += mods.y;
   this.currentPlayer.drawGameBoard();
+};
+
+LaGamePlayer.inverseHorizontally = function(mp) {
+  if (mp.type != 'l') return;
+  var maxX = 0;
+  var fields = realisePiece(mp);
+  var x;
+  for (var i = 0; i < fields.length; ++i) {
+    x = fields[i].x - mp.x;
+    if (Math.abs(x) > Math.abs(maxX)) maxX = x;
+  }
+  mp.inv = !mp.inv;
+  mp.x += maxX;
+};
+
+LaGamePlayer.inverseVertically = function(mp) {
+  if (mp.type != 'l') return;
+  LaGamePlayer.rotateLPiece(mp);
+  LaGamePlayer.rotateLPiece(mp);
+  LaGamePlayer.inverseHorizontally(mp);
 };
 
 LaGamePlayer.rotateLPiece = function(piece) {
