@@ -106,9 +106,14 @@ LaGamePlayer.gameKeyEvent = function(e) {
   var mp = this.currentPlayer.movingPiece;
   switch (e.keyCode) {
     case 13: // Enter
-      if (!mp) break;
-      if (this.currentPlayer.endMoveCallback)
-        this.currentPlayer.endMoveCallback(mp);
+      if (!mp) return;
+      if (!this.logic.isValidMove(mp)) return;
+      var callback = this.currentPlayer.endMoveCallback;
+      if (callback) {
+        window.setTimeout(function() {
+          callback(mp);
+        }, 0);
+      }
       this.currentPlayer.stopMoving();
       break;
     case 32: // Space bar
