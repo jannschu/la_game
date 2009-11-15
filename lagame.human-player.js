@@ -49,7 +49,29 @@ LaGamePlayer.choosePiece = function(e) {
   var y = e.pageY - this.offsetTop;
   var piece = this.currentPlayer.coordOverOwnGamePiece(x, y);
   if (piece) {
-    this.currentPlayer.movingPiece = piece;
+    /*
+     * FIXME: discuss: need to make copy of piece so the logic's piece
+     * doesn't get changed when simulating movement
+     */
+     
+    /* Old line: */
+    /*this.currentPlayer.movingPiece = piece; */
+    /* FIXME: Debug code following */
+    /* h4xd stuff: */
+    this.currentPlayer.movingPiece = {
+      type:piece.type, x:piece.x, y:piece.y
+    }
+    if (piece.type == "l") {
+      this.currentPlayer.movingPiece.rot = piece.rot,
+      this.currentPlayer.movingPiece.inv = piece.inv
+      this.currentPlayer.movingPiece.player = piece.player
+    }
+    else if (piece.type == "n") {
+      this.currentPlayer.movingPiece.nid = piece.nid
+    }
+    /* end of h4x */
+    /* FIXME: Debug code ends here */
+    
     this.currentPlayer.gui.canvas.style.cursor = 'default';
     this.currentPlayer.drawGameBoard();
   }
@@ -206,5 +228,14 @@ LaGamePlayer.prototype.drawGameBoard = function() {
     } else {
       this.gui.setLPiece(mp.x, mp.y, mp.rot, mp.inv, mp.player, true);
     }
+    /* FIXME: Debug code following; clean up & remove later */
+    var collisions = this.logic.isValidMove(mp);
+    if (collisions.error == "collision") {
+      for (var c1 = 0; c1 < collisions.fields.length; c1++) {
+        this.gui.setCollision(collisions.fields[c1].x,
+        collisions.fields[c1].y);
+      }
+    }
+    /* FIXME: Debug code ends here */
   }
 };

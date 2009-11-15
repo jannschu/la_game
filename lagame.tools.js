@@ -36,7 +36,7 @@ function realisePiece(piece) {
   }
 }
 
-/* Make opposite of param (0 if param 1, 1 if param 0) */
+/* Return the opposite of param (0 if param 1, 1 if param 0) */
 function makeOpposite(of) {
   if (of == 1) {
     return 0

@@ -86,6 +86,28 @@ LaGameGUI.prototype.unsetLPiece = function(x, y, rotation, inversed) {
   this.setLPiece(x, y, rotation, inversed, 2);
 };
 
+/* FIXME: Debug code following; clean up & remove later */
+/**
+ * Places a collision signifier at a given position.
+ * Too lazy for the rest.
+ */
+LaGameGUI.prototype.setCollision = function(x, y) {
+  var canX = (this.border + this.fieldSize) * x + this.border;
+  var canY = (this.border + this.fieldSize) * y + this.border;
+
+  var ctx = this.canvas.getContext('2d');
+
+  ctx.fillStyle = 'blue';
+  ctx.globalAlpha = 1;
+  ctx.fillRect(canX, canY, this.fieldsize, this.fieldSize);
+  ctx.globalAlpha = 1;
+}
+/* FIXME: Debug code ends here */
+LaGameGUI.prototype.unsetCollision = function(x, y) {
+
+}
+
+/* FIXME: Debug code ends here */
 /**
  * Draws the basic game board with its borders and lines
  */

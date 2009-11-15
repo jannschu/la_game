@@ -38,8 +38,8 @@ function LaGameLogic(gui, playerA, playerB) {
   )
   
   this.nPieces = new Array (
-    { type:"n", nid:0, x:0, y:1 },
-    { type:"n", nid:1, x:1, y:2 }
+    { type:"n", nid:0, x:0, y:0 },
+    { type:"n", nid:1, x:3, y:3 }
   )
   
   this.playerCanMoveL = true
@@ -117,10 +117,6 @@ LaGameLogic.prototype.doMove = function(move) {
     if (this.playerCanMoveL == false) {
       return { error:"alreadymovedl" }
     }
-    /* Check if it is, in fact, a move (i.e. not copying the old position) */
-    if (this.lPieces[this.curPlayer] == move) {
-      return { error:"nomove" }
-    }
   }
   
   /* N pieces */
@@ -190,7 +186,7 @@ LaGameLogic.prototype.checkOutOfBounds = function(fields) {
 
   var overLapFields = new Array()
   /* FIXME maybe: what if both x and y are screwed up? -> duplicate entry */
-  for (var c1 = 0; v1 < fields.length; c1++) {
+  for (var c1 = 0; c1 < fields.length; c1++) {
     if (fields.x > 3 || fields.x < 0) {
       retVal.overLapFields.push({ where:"x", x:fields.x, y:fields.y })
     }
@@ -246,8 +242,9 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
     /* We'll need that */
     oppPlayer = makeOpposite(this.curPlayer)
     
-    candidates.concat(realisePiece(this.lPieces[oppPlayer]))
-    candidates.concat(this.nPieces)
+    candidates = candidates.concat(realisePiece(this.lPieces[oppPlayer]))
+    candidates = candidates.concat(this.nPieces)
+    
   }
   else if (move.type == "n") {
     /*
@@ -258,12 +255,12 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
     /* We'll need that */
     otherN = makeOpposite(move.nid)
     
-    candidates.concat(this.lPieces[0])
-    candidates.concat(this.lPieces[1])
+    candidates = candidates.concat(this.lPieces[0])
+    candidates = candidates.concat(this.lPieces[1])
     candidates.push(this.nPieces[otherN])
     
   }
-  
+
   /* This neat array will store all colliding fields */
   var collidingFields = new Array()
   
@@ -271,13 +268,14 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
   for (var c1 = 0; c1 < fields.length; c1++) {
     for (var c2 = 0; c2 < candidates.length; c2++) {
     
-      if (fields.x == candidates[c1].x && fields.y == candidates[c1].y) {
+      if (fields[c1].x == candidates[c2].x && fields[c1].y == candidates[c2].y) {
         collidingFields.push(fields[c1])
       }
     
     }
   }
-
+  
+  
   if (collidingFields.length != 0) {
     return { error:"collision", fields:collidingFields }
   }
