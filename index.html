@@ -25,11 +25,7 @@
   <script type="text/javascript" src="lagame.player.js"></script>
   <script type="text/javascript" src="lagame.logic.js"></script>
   <script type="text/javascript">
-    window.onload = function() {
-      document.getElementById('newGame').addEventListener('click', function() {
-        return window.confirm('Wirklich das Spiel neustarten?');
-      }, false);
-      
+    function newGame() {
       var playerLabel = document.getElementById('currentPlayer');
       var nextPlayer = document.getElementById('nextPlayer');
       var canvas = document.getElementById('laGameCanvas');
@@ -45,7 +41,14 @@
       }, false)
       
       logic.initializeGame();
-      
+    }
+    
+    window.onload = function() {
+      document.getElementById('newGame').addEventListener('click', function() {
+        if (window.confirm('Wirklich das Spiel neustarten?'))
+          newGame();
+      }, false);
+      newGame();
     }
   </script>
   <title>La Game</title>
