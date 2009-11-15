@@ -184,10 +184,9 @@ LaGameLogic.prototype.doMove = function(move) {
   /* If both playerCan* vars are false, it's the other player's turn */
   if (this.playerCanMoveL == false && this.playerCanMoveN == false) {
     this.switchPlayers()
+  } else {
+    this.registerCallback()
   }
-  
-  /* In any case, the current player will have to do a move */
-  this.registerCallback();
   
   return { error:"none" }
   
@@ -379,8 +378,6 @@ LaGameLogic.prototype.finishTurn = function() {
   
   this.switchPlayers()
   
-  this.registerCallback();
-  
   return { error:"none" }
 
 }
@@ -529,6 +526,8 @@ LaGameLogic.prototype.switchPlayers = function() {
   
   if (this.hasWon() == true) {
     alert("Sie (Spieler Numero " + (this.curPlayer+1) + ") haben verloren.")
+  } else {
+    this.registerCallback();
   }
   
 }
