@@ -88,11 +88,7 @@ LaGameLogic.prototype.initializeGame = function() {
   this.gui.setLPiece(l1.x, l1.y, l1.rot, l1.inv, 1);
   
   /* Request move from player */
-  var logic = this;
-  this.players[this.curPlayer].startMoving(
-    this.playerCanMoveL, this.playerCanMoveN,
-    function(newPiece) { logic.doMove(newPiece) }
-  )
+  this.registerCallback();
 };
 
 /**
@@ -191,14 +187,19 @@ LaGameLogic.prototype.doMove = function(move) {
   }
   
   /* In any case, the current player will have to do a move */
-  var logic = this;
-  this.players[this.curPlayer].startMoving(
-    this.playerCanMoveL, this.playerCanMoveN,
-    function(newPiece) { logic.doMove(newPiece) }
-  )
+  this.registerCallback();
   
   return { error:"none" }
   
+}
+
+LaGameLogic.prototype.registerCallback = function() {
+  var n = this.playerCanMoveL ? false : this.playerCanMoveN;
+  var logic = this;
+  this.players[this.curPlayer].startMoving(
+    this.playerCanMoveL, n,
+    function(newPiece) { logic.doMove(newPiece) }
+  )
 }
 
 /**
@@ -378,11 +379,7 @@ LaGameLogic.prototype.finishTurn = function() {
   
   this.switchPlayers()
   
-  var logic = this;
-  this.players[this.curPlayer].startMoving(
-    this.playerCanMoveL, this.playerCanMoveN,
-    function(newPiece) { logic.doMove(newPiece) }
-  )
+  this.registerCallback();
   
   return { error:"none" }
 
