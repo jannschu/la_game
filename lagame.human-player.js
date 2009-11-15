@@ -251,7 +251,7 @@ LaGamePlayer.prototype.drawGameBoard = function() {
     } else {
       this.gui.setLPiece(mp.x, mp.y, mp.rot, mp.inv, mp.player, true);
     }
-    /* FIXME: Debug code following; clean up & remove later */
+    /* debugging code
     var collisions = this.logic.isValidMove(mp);
     if (collisions.error == "collision") {
       for (var c1 = 0; c1 < collisions.fields.length; c1++) {
@@ -259,6 +259,6 @@ LaGamePlayer.prototype.drawGameBoard = function() {
         collisions.fields[c1].y);
       }
     }
-    /* FIXME: Debug code ends here */
+    */
   }
 };
