@@ -99,10 +99,9 @@ LaGamePlayer.copyPiece = function(piece) {
 };
 
 LaGamePlayer.gameKeyEvent = function(e) {
-  if (!this.currentPlayer.doingMove || !this.currentPlayer.movingPiece) {
-    this.currentPlayer.unregisterEvents();
+  if (!this.currentPlayer.doingMove || !this.currentPlayer.movingPiece)
     return;
-  }
+  
   var mp = this.currentPlayer.movingPiece;
   switch (e.keyCode) {
     case 13: // Enter
@@ -114,7 +113,7 @@ LaGamePlayer.gameKeyEvent = function(e) {
           callback(mp);
         }, 0);
       }
-      break;
+      return;
     case 32: // Space bar
       LaGamePlayer.rotateLPiece(mp);
       break;
