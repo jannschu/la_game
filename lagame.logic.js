@@ -308,9 +308,12 @@ LaGameLogic.prototype.hasWon = function() {
             
           }
         }
+        /*
+         * Go back one (actually two) step(s) in case it's like [ 0 0 0 0 ]
+         * Would be -1 if it weren't for the automatic increment
+         */
+        c2 -= 2
         hempty = new Array()
-        /* Go back one step in case it's like [ 0 0 0 0 ] */
-        c2--
       } /* end of horizontal candidate */
 
     }
@@ -332,6 +335,7 @@ LaGameLogic.prototype.hasWon = function() {
       }
 
       if (vempty.length == 3) { /* vertical candidates found */
+      alert("vcand: " + vempty[0].x + "," + vempty[0].y)
         /* Go through all the stubs */
         for (var c3 = 0; c3 < stubX.length; c3++) {
           if (vempty[0].y+stubY[c3].y < 0 || vempty[0].y+stubY[c3].y > 3
@@ -339,6 +343,7 @@ LaGameLogic.prototype.hasWon = function() {
             continue;
           }
           if (field[vempty[0].y+stubY[c3].y][vempty[0].x+stubY[c3].x] == 0) {
+          alert("foundL: " + vempty[0].y+stubY[c3].y + "," + vempty[0].x+stubY[c3].x)
             /* Stub empty as well; complete L found! */
             completeL = completeL.concat(vempty)
             completeL = completeL.push({
@@ -353,7 +358,11 @@ LaGameLogic.prototype.hasWon = function() {
             completeL = new Array()
           }
         }
-        c2--
+        /*
+         * Go back one (actually two) step(s) in case it's like [ 0 0 0 0 ]
+         * Would be -1 if it weren't for the automatic increment
+         */
+        c2 -= 2
         vempty = new Array()
       } /* end of vertical candidate */
 
