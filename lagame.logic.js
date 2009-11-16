@@ -525,10 +525,8 @@ LaGameLogic.prototype.switchPlayers = function() {
   this.playerCanMoveN = true
   
   if (this.hasWon() == true) {
-    this.gui.setPlayerLabel(
-      "Spieler " + makeOpposite(this.curPlayer) + " gewinnt!", 
-      makeOpposite(this.curPlayer)
-    )
+    var msg = "Spieler " + (makeOpposite(this.curPlayer) + 1) + " hat gewonnen";
+    this.gui.setPlayerLabel(msg, makeOpposite(this.curPlayer));
   } else {
     this.registerCallback();
   }
