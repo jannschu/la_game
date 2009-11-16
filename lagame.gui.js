@@ -97,13 +97,19 @@ LaGameGUI.prototype.setLPiece = function(x, y, rotation, inversed, player, choos
   var fields = realisePiece({x:x, y:y, rot:rotation, inv:inversed, type:"l"});
   
   var ctx = this.canvas.getContext('2d');
-  ctx.fillStyle = this.lColor[player];
-  if (choosing) ctx.globalAlpha = 0.5
+  if (choosing) ctx.globalAlpha = 0.5;
+  var borderColor = player == 2 ? 'black' : this.lColor[player];
   var canX, canY;
   for(var i = 0; i < fields.length; ++i) {
     canX = (this.border + this.fieldSize) * fields[i].x + this.border;
     canY = (this.border + this.fieldSize) * fields[i].y + this.border;
+    ctx.fillStyle = this.lColor[player];
     ctx.fillRect(canX, canY, this.fieldSize, this.fieldSize);
+    ctx.fillStyle = borderColor;
+    if (this.existsField(fields[i], fields, 'left')) 
+      this.drawFillBorder(ctx, canX, canY, 'left');
+    if (this.existsField(fields[i], fields, 'top')) 
+      this.drawFillBorder(ctx, canX, canY, 'top');
   }
   ctx.globalAlpha = 1;
 };
@@ -158,3 +164,29 @@ LaGameGUI.prototype.drawGameBoard = function() {
 /*****************************************************************************/
 /*                                PRIVATE                                    */
 /*****************************************************************************/
+LaGameGUI.prototype.existsField = function(field, fields, position) {
+  var searchField = {};
+  switch (position) {
+    case 'left': searchField = {x: field.x - 1, y: field.y}; break;
+    case 'top': searchField = {x: field.x, y: field.y - 1}; break;
+  }
+  for (var i = 0; i < fields.length; ++i) {
+    if (searchField.x == fields[i].x && searchField.y == fields[i].y)
+      return searchField;
+  }
+  return false;
+}
+
+LaGameGUI.prototype.drawFillBorder = function(ctx, x, y, pos) {
+  var width, height;
+  if (pos == 'left') {
+    x -= this.border;
+    width = this.border;
+    height = this.fieldSize;
+  } else {
+    y -= this.border;
+    width = this.fieldSize;
+    height = this.border;
+  }
+  ctx.fillRect(x, y, width, height);
+};
