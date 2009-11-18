@@ -96,8 +96,16 @@ function makeOpposite(of) {
   }
 }
 
+/* Copies an array */
+function copyArray(arr) {
+
+  /* RAAARGH */
+
+}
+
 /* Map coords to array index */
 function mapCToA(obj) {
   return obj.y*4 + obj.x
 }
+
 
