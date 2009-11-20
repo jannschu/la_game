@@ -16,6 +16,16 @@
  * along with La Game.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
+Object.prototype.copy = function() {
+  if (typeof this == 'object') {
+    var copy = {};
+    copy.__proto__ = this.__proto__;
+    for (var p in this)
+      if (this.hasOwnProperty(p)) copy[p] = this[p].copy();
+    return copy;
+  } else return this;
+}
+
 /* 
  * Fields for all possible L-Piece positions
  * @see LaGameGUI#setLPiece
@@ -96,12 +106,6 @@ function makeOpposite(of) {
   }
 }
 
-/* Copies an array */
-function copyArray(arr) {
-
-  /* RAAARGH */
-
-}
 
 /* Map coords to array index */
 function mapCToA(obj) {
