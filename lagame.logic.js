@@ -335,7 +335,6 @@ LaGameLogic.prototype.hasWon = function() {
       }
 
       if (vempty.length == 3) { /* vertical candidates found */
-      alert("vcand: " + vempty[0].x + "," + vempty[0].y)
         /* Go through all the stubs */
         for (var c3 = 0; c3 < stubX.length; c3++) {
           if (vempty[0].y+stubY[c3].y < 0 || vempty[0].y+stubY[c3].y > 3
@@ -343,7 +342,6 @@ LaGameLogic.prototype.hasWon = function() {
             continue;
           }
           if (field[vempty[0].y+stubY[c3].y][vempty[0].x+stubY[c3].x] == 0) {
-          alert("foundL: " + vempty[0].y+stubY[c3].y + "," + vempty[0].x+stubY[c3].x)
             /* Stub empty as well; complete L found! */
             completeL = completeL.concat(vempty)
             completeL = completeL.push({
