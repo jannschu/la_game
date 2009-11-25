@@ -40,9 +40,9 @@
       gui.setPlayerLabel('Spieler 1 beginnt', 0);
       gui.setCanFinishTurn(false);
       
-      document.getElementById('nextPlayer').addEventListener('click', function() {
+      document.getElementById('nextPlayer').onclick = function() {
         logic.finishTurn();
-      }, false)
+      }
       
       logic.initializeGame();
     }
