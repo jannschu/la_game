@@ -51,6 +51,15 @@ LaGameGUI.prototype.setCanFinishTurn = function(bool) {
   this.nextPlayerButton.disabled = !bool;
 };
 
+LaGameGUI.prototype.coordToPoint = function(cX, cY) {
+  var dim = this.border + this.fieldSize;
+  var x = Math.floor(cX / dim);
+  var y = Math.floor(cY / dim);
+  if (x == 4) x = 3;
+  if (y == 4) y = 3;
+  return {x:x, y:y};
+};
+
 /*****************************************************************************/
 /*                                DRAWING                                    */
 /*****************************************************************************/
@@ -73,18 +82,6 @@ LaGameGUI.prototype.setNeutral = function(x, y, choosing) {
 };
 
 /**
- * @param {Number} x Horizontal position from top left
- * @param {Number} y Vertical position from top left
- */
-LaGameGUI.prototype.unsetNeutral = function(x, y) {
-  var canX = (this.border + this.fieldSize) * x + this.border;
-  var canY = (this.border + this.fieldSize) * y + this.border;
-  var ctx = this.canvas.getContext('2d');
-  ctx.fillStyle = 'white';
-  ctx.fillRect(canX, canY, this.fieldSize, this.fieldSize);
-};
-
-/**
  * @see #setNeutral
  * @param {Number} rotation Can be 0, 1, 2, 3
  * Starting by 0 and then rotated anti-clockwise:
@@ -95,7 +92,10 @@ LaGameGUI.prototype.unsetNeutral = function(x, y) {
  */
 LaGameGUI.prototype.setLPiece = function(x, y, rotation, inversed, player, choosing) {
   var fields = realisePiece({x:x, y:y, rot:rotation, inv:inversed, type:"l"});
-  
+  this.setLFields(fields, player, choosing);
+};
+
+LaGameGUI.prototype.setLFields = function(fields, player, choosing) {
   var ctx = this.canvas.getContext('2d');
   if (choosing) ctx.globalAlpha = 0.5;
   var borderColor = player == 2 ? 'black' : this.lColor[player];
@@ -112,13 +112,6 @@ LaGameGUI.prototype.setLPiece = function(x, y, rotation, inversed, player, choos
       this.drawFillBorder(ctx, canX, canY, 'top');
   }
   ctx.globalAlpha = 1;
-};
-/**
- * @see #setLPiece
- * @see #unsetNeutral
- */
-LaGameGUI.prototype.unsetLPiece = function(x, y, rotation, inversed) {
-  this.setLPiece(x, y, rotation, inversed, 2);
 };
 
 /**
@@ -139,10 +132,6 @@ LaGameGUI.prototype.setCollision = function(x, y, color) {
   ctx.fillRect(canX, canY + b , b, f);
   ctx.fillRect(canX + b + f, canY + b, b, f);
   ctx.fillRect(canX, canY + b + f, f + b * 2, b);
-}
-
-LaGameGUI.prototype.unsetCollision = function(x, y) {
-  this.setCollision(x, y, 'black');
 }
 
 /**
