@@ -67,6 +67,10 @@ function LaGameLogic(gui, playerA, playerB) {
     
 }
 
+LaGameLogic.prototype.stopGame = function() {
+  this.players[this.curPlayer].stopMoving();
+};
+
 LaGameLogic.prototype.getLPieces = function() {
   return this.lPieces;
 };

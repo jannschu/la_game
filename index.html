@@ -25,13 +25,17 @@
   <script type="text/javascript" src="lagame.player.js"></script>
   <script type="text/javascript" src="lagame.logic.js"></script>
   <script type="text/javascript">
+    currentGame = null;
     function newGame() {
+      if (currentGame) currentGame.stopGame();
+      
       var playerLabel = document.getElementById('currentPlayer');
       var nextPlayer = document.getElementById('nextPlayer');
       var canvas = document.getElementById('laGameCanvas');
       
       var gui = new LaGameGUI(canvas, playerLabel, nextPlayer);
       var logic = new LaGameLogic(gui, LaGamePlayer, LaGamePlayer);
+      currentGame = logic;
       
       gui.setPlayerLabel('Spieler 1 beginnt', 0);
       gui.setCanFinishTurn(false);
