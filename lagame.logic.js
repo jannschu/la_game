@@ -251,6 +251,8 @@ LaGameLogic.prototype.hasWon = function() {
     outp += "\n"
   }    
   
+
+  
   /* Empty horizontal fields */
   var hempty = new Array()
   
@@ -348,10 +350,13 @@ LaGameLogic.prototype.hasWon = function() {
           if (field[vempty[0].y+stubY[c3].y][vempty[0].x+stubY[c3].x] == 0) {
             /* Stub empty as well; complete L found! */
             completeL = completeL.concat(vempty)
-            completeL = completeL.push({
-              x:vempty[0].x+stubX[c3].x,
-              y:vempty[0].y+stubX[c3].y
+
+            completeL.push({
+              x:vempty[0].x+stubY[c3].x,
+              y:vempty[0].y+stubY[c3].y
             })
+            
+            
             /* Now check if the complete L equals the own L piece */
             if (isSameL(this.lPieces[this.curPlayer], completeL) == false) {
               /* No winrar */
