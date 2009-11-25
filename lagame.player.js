@@ -317,11 +317,17 @@ LaGamePlayer.prototype.canBeValidLPiece = function(fields) {
     }
     return false;
   }
+  var player = this;
+  var notOldLPiece = function(fields) {
+    var cond = player.getCondensedLPieceFor(fields);
+    var old = player.logic.getLPieces()[player.playerNumber];
+    return cond.x != old.x || cond.y != old.y || cond.rot != old.rot || cond.inv != old.inv
+  }
   switch (fields.length) {
     case 2: return isPair(fields[0], fields[1]);
     case 3: return isLine(fields[0], fields[1], fields[2]) ||
       isEdge(fields[0], fields[1], fields[2]);
-    case 4: return isL(fields[0], fields[1], fields[2], fields[3]);
+    case 4: return isL(fields[0], fields[1], fields[2], fields[3]) && notOldLPiece(fields);
   }
 };
 
