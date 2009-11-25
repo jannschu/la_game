@@ -50,15 +50,7 @@ function LaGameLogic(gui, playerA, playerB) {
   this.players = new Array(new playerA(0, gui, this), new playerB(1, gui, this))
   this.curPlayer = 0
   
-  this.lPieces = new Array (
-    { player: 0, type:"l", x:0, y:2, rot:0, inv:false },
-    { player: 1, type:"l", x:3, y:1, rot:2, inv:false }
-  )
-  
-  this.nPieces = new Array (
-    { type:"n", nid:0, x:0, y:0 },
-    { type:"n", nid:1, x:3, y:3 }
-  )
+  this.field = new LaGameField()
   
   this.playerCanMoveL = true
   this.playerCanMoveN = true
@@ -68,11 +60,11 @@ function LaGameLogic(gui, playerA, playerB) {
 }
 
 LaGameLogic.prototype.getLPieces = function() {
-  return this.lPieces;
+  return this.field.lPieces;
 };
 
 LaGameLogic.prototype.getNPieces = function() {
-  return this.nPieces;
+  return this.field.nPieces;
 }
 
 LaGameLogic.prototype.initializeGame = function() {
@@ -270,10 +262,10 @@ LaGameLogic.prototype.checkOutOfBounds = function(fields) {
 LaGameLogic.prototype.checkMoveAtAll = function(move) {
 
   if (
-  move.x == this.lPieces[this.curPlayer].x &&
-  move.y == this.lPieces[this.curPlayer].y &&
-  move.rot == this.lPieces[this.curPlayer].rot &&
-  move.inv == this.lPieces[this.curPlayer].inv
+  move.pos.x == this.field.lPieces[this.curPlayer].pos.x &&
+  move.pos.y == this.field.lPieces[this.curPlayer].pos.y &&
+  move.rot == this.field.lPieces[this.curPlayer].rot &&
+  move.inv == this.field.lPieces[this.curPlayer].inv
   ) {
   
     return { error:"nomove" }
@@ -293,7 +285,7 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
   /* First determine the fields with which the moved piece could collide. */
   var candidates = new Array();
   
-  if (move.type == "l") {
+  if (move instanceof LPiece) {
     /* 
      * If it's a L piece, it could collide with the opponent's L piece and
      * both N pieces.
@@ -302,11 +294,12 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
     /* We'll need that */
     var oppPlayer = makeOpposite(this.curPlayer)
     
-    candidates = candidates.concat(realisePiece(this.lPieces[oppPlayer]))
-    candidates = candidates.concat(this.nPieces)
+    candidates = candidates.concat(this.lPieces[oppPlayer].realise())
+    candidates.push(this.field.nPieces[0].realise())
+    candidates.push(this.field.nPieces[1].realise())
     
   }
-  else if (move.type == "n") {
+  else if (move instanceof NPiece) {
     /*
      * If it's a N piece, it could collide with both L pieces and the other
      * N piece.
@@ -315,9 +308,9 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
     /* We'll need that */
     var otherN = makeOpposite(move.nid)
     
-    candidates = candidates.concat(realisePiece(this.lPieces[0]))
-    candidates = candidates.concat(realisePiece(this.lPieces[1]))
-    candidates.push(this.nPieces[otherN])
+    candidates = candidates.concat(this.field.lPieces[0].realise())
+    candidates = candidates.concat(this.field.lPieces[1].realise())
+    candidates.push(this.field.nPieces[otherN].realise())
     
   }
 
