@@ -192,7 +192,7 @@ LaGamePlayer.prototype.stopDragging = function(e) {
 
 LaGamePlayer.prototype.exitDragging = function() {
   if (!this.doingMove) return;
-  if (this.dragging) this.retryMove(false);
+  if (this.dragging || this.movingPiece.type == 'n') this.retryMove(false);
 };
 
 /*****************************************************************************/
