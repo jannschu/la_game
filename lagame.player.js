@@ -65,16 +65,17 @@ LaGamePlayer.prototype.startMoving = function(l, neutral, callback) {
 };
 // notRedraw: true will not draw it, false will draw it
 LaGamePlayer.prototype.retryMove = function(notRedraw) {
-  this.stopMoving(notRedraw);
+  var mp = this.canMoveL && !this.canMoveNeutral ? this.movingPiece : null;
+  this.stopMoving(notRedraw, mp);
   this.doingMove = true;
   this.registerChooseEvents();
 };
 
-LaGamePlayer.prototype.stopMoving = function(notRedraw) {
+LaGamePlayer.prototype.stopMoving = function(notRedraw, newMovingPiece) {
   this.unregisterEvents();
   this.doingMove = false;
   this.dragging = false;
-  this.movingPiece = null;
+  this.movingPiece = newMovingPiece;
   this.draggedFields = [];
   if (!notRedraw) this.drawGameBoard();
 };
@@ -173,21 +174,26 @@ LaGamePlayer.prototype.drag = function(e) {
 
 LaGamePlayer.prototype.stopDragging = function(e) {
   if (!this.doingMove || !this.movingPiece) return;
-  
   this.dragging = false;
-  
   if (this.movingPiece.type == 'n') {
     var pos = this.mousePosToCanvasPosition(e);
     this.movingPiece.x = pos.x;
     this.movingPiece.y = pos.y;
     this.callEndCallback(this.movingPiece);
+    this.exitDragging();
   } else if (this.movingPiece.type == 'l' && this.draggedFields.length == 4) {
-    var condensedForm = this.getCondensedLPieceFor(this.draggedFields);
-    this.callEndCallback(condensedForm);
-  } else {
-    this.dragging = true;
+    var pos = this.mousePosToCanvasPosition(e);
+    if (this.coordOverOwnGamePiece(pos, this.draggedFields)) { // ends drag over field
+      var condensedForm = this.getCondensedLPieceFor(this.draggedFields);
+      this.callEndCallback(condensedForm);
+      this.exitDragging();
+      return;
+    }
   }
-  this.exitDragging();
+  if (this.movingPiece.type == 'l') {
+    this.dragging = true;
+    this.retryMove();
+  } else this.exitDragging();
 }
 
 LaGamePlayer.prototype.exitDragging = function() {
@@ -357,7 +363,7 @@ LaGamePlayer.prototype.getNonEmptyPieces = function() {
   return pieces;
 };
 
-LaGamePlayer.prototype.coordOverOwnGamePiece = function(pos) {
+LaGamePlayer.prototype.coordOverOwnGamePiece = function(pos, additonalFields) {
   var pieces = [];
   if (this.canMoveNeutral) pieces = pieces.concat(this.logic.getNPieces());
   if (this.canMoveL) pieces.push(this.logic.getLPieces()[this.playerNumber]);
@@ -366,6 +372,7 @@ LaGamePlayer.prototype.coordOverOwnGamePiece = function(pos) {
   for (var i = 0; i < pieces.length; ++i) {
     piece = pieces[i];
     fields = realisePiece(piece);
+    if (i == 0 && additonalFields) fields = fields.concat(additonalFields);
     for (j = 0; j < fields.length; ++j) {
       field = fields[j];
       if (pos.x == field.x && pos.y == field.y) return piece;
