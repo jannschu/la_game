@@ -50,7 +50,15 @@ function LaGameLogic(gui, playerA, playerB) {
   this.players = new Array(new playerA(0, gui, this), new playerB(1, gui, this))
   this.curPlayer = 0
   
-  this.field = new LaGameField()
+  this.lPieces = new Array (
+    { player: 0, type:"l", x:0, y:2, rot:0, inv:false },
+    { player: 1, type:"l", x:3, y:1, rot:2, inv:false }
+  )
+  
+  this.nPieces = new Array (
+    { type:"n", nid:0, x:0, y:0 },
+    { type:"n", nid:1, x:3, y:3 }
+  )
   
   this.playerCanMoveL = true
   this.playerCanMoveN = true
@@ -60,11 +68,11 @@ function LaGameLogic(gui, playerA, playerB) {
 }
 
 LaGameLogic.prototype.getLPieces = function() {
-  return this.field.lPieces;
+  return this.lPieces;
 };
 
 LaGameLogic.prototype.getNPieces = function() {
-  return this.field.nPieces;
+  return this.nPieces;
 }
 
 LaGameLogic.prototype.initializeGame = function() {
@@ -131,7 +139,7 @@ LaGameLogic.prototype.doMove = function(move) {
   /* Check if player can execute the move (simple conditions) */
   
   /* L pieces */
-  if (move instanceof LPiece) {
+  if (move.type == "l") {
     /* Check if the move is "available" */
     if (this.playerCanMoveL == false) {
       return { error:"alreadymovedl" }
@@ -139,7 +147,7 @@ LaGameLogic.prototype.doMove = function(move) {
   }
   
   /* N pieces */
-  if (move instanceof NPiece) {
+  if (move.type == "n") {
     if (this.playerCanMoveN == false) {
       return { error:"alreadymovedn" }
     }
@@ -157,13 +165,13 @@ LaGameLogic.prototype.doMove = function(move) {
   }
   
   /* Actually execute the move, also setting the playerCan* vars */
-  if (move instanceof LPiece) {
-    this.field.lPieces[this.curPlayer] = move
+  if (move.type == "l") {
+    this.lPieces[this.curPlayer] = move
     this.playerCanMoveL = false
   }
-  else if (move instanceof NPiece)
+  else if (move.type == "n")
   {
-    this.field.nPieces[move.nid] = move
+    this.nPieces[move.nid] = move
     this.playerCanMoveN = false
   }
   
@@ -197,13 +205,170 @@ LaGameLogic.prototype.registerCallback = function() {
  * Checks if the current player has won
  */
 LaGameLogic.prototype.hasWon = function() {
-  var ls = this.field.getEmptyLs(this.curPlayer, 1)
+
+  /*if (this.playerCanMoveL != false) {
+    return "lnotmovedyet"
+  }*/
   
-  if (ls.length == 0) {
-    return true
+  /* FIXME: build function out of this */
+  /* Actual check starts here */
+  
+  /* Realise all of the pieces except for the player's L piece */
+  /* FIXME: Implement zero-overhead */
+  var realisedFields = new Array()
+  realisedFields = realisedFields.concat(
+    realisePiece(this.lPieces[makeOpposite(this.curPlayer)])
+  )
+  realisedFields = realisedFields.concat(this.nPieces[0])
+  realisedFields = realisedFields.concat(this.nPieces[1])
+  
+  /* Fill a field containing all those fields */
+  var field = new Array()
+  
+  /* Initialize that field */
+  for (var c1 = 0; c1 < 4; c1++) {
+    field[c1] = new Array()
+    for (var c2 = 0; c2 < 4; c2++) {
+      field[c1][c2] = 0
+    }
   }
   
-  return false  
+  /* Set the piece-occupied fields to 1 */
+  for (var c1 = 0; c1 < realisedFields.length; c1++) {
+    field[realisedFields[c1].y][realisedFields[c1].x] = 1
+  }
+  
+  /* FIXME: Debug code */
+  var outp = ""
+  for (var c1 = 0; c1 < field.length; c1++) {
+    for (var c2 = 0; c2 < field[c1].length; c2++) {
+      outp += field[c1][c2] + " "
+    }
+    outp += "\n"
+  }    
+  
+  /* Empty horizontal fields */
+  var hempty = new Array()
+  
+  /* Empty vertical fields */
+  var vempty = new Array()
+  
+  /* Will contain the complete Ls found */
+  var completeL = new Array()
+  
+  /* Stub positions relative to the 1st L field for horizontal alignment */
+  var stubX = [ { x:0, y:-1 }, { x:0, y:1 },
+                 { x:2, y:-1 }, { x:2, y:1 } ]
+  
+  /* Stub positions relative to the 1st L field for vertical alignment */
+  var stubY = [ { x:-1, y:0 }, { x:1, y:0 },
+                 { x:-1, y:2 }, { x:1, y:2 } ]
+  
+  /* TODO: Restructure;
+   * Remark: though of course it would be nicer, 
+   * the effort one has to take
+   * in order to do it all in one
+   * is worth doing it in two loops.
+   */
+  
+  /* Horizontal check */
+  /* Vertical loop */
+  for (var c1 = 0; c1 < 4; c1++) {
+    /* Horizontal loop */
+    hempty = new Array() /* has to be reset to avoid multiline lines */
+    for (var c2 = 0; c2 < 4; c2++) {
+      if (field[c1][c2] == 0) {
+        /* If found an empty position, add that position to the empty lists */
+        hempty.push({ y:c1, x:c2 })
+      }
+      else if (field[c1][c2] == 1) {
+        /* If found an occupied position before a list's len > 3, remove */
+        hempty = new Array()
+      }
+      if (hempty.length == 3) { /* horizontal candidates found */
+        /* Go through all the stubs */
+        for (var c3 = 0; c3 < stubX.length; c3++) {
+          if (hempty[0].y+stubX[c3].y < 0 || hempty[0].y+stubX[c3].y > 3
+          || hempty[0].x+stubX[c3].x < 0 || hempty[0].x+stubX[c3].x > 3) {
+            continue;
+          }
+          if (field[hempty[0].y+stubX[c3].y][hempty[0].x+stubX[c3].x] == 0) {
+            /* Stub empty as well; complete L found! */
+            completeL = completeL.concat(hempty)
+            completeL.push({
+              x:hempty[0].x+stubX[c3].x,
+              y:hempty[0].y+stubX[c3].y
+            })
+            /* Now check if the complete L equals the own L piece */
+            if (isSameL(this.lPieces[this.curPlayer], completeL) == false) {
+              /* No winrar */
+              return false
+            }
+            completeL = new Array()
+            
+          }
+        }
+        /*
+         * Go back one (actually two) step(s) in case it's like [ 0 0 0 0 ]
+         * Would be -1 if it weren't for the automatic increment
+         */
+        c2 -= 2
+        hempty = new Array()
+      } /* end of horizontal candidate */
+
+    }
+  }
+  
+  /* Vertical check */
+  /* Horizontal loop */
+  for (var c1 = 0; c1 < 4; c1++) {
+    /* Vertical loop */
+    vempty = new Array() /* has to be reset to avoid multiline lines */
+    for (var c2 = 0; c2 < 4; c2++) {
+      if (field[c2][c1] == 0) {
+        /* If found an empty position, add that position to the empty lists */
+        vempty.push({ y:c2, x:c1 })
+      }
+      else if (field[c2][c1] == 1) {
+        /* If found an occupied position before a list's len > 3, remove */
+        vempty = new Array()
+      }
+
+      if (vempty.length == 3) { /* vertical candidates found */
+        /* Go through all the stubs */
+        for (var c3 = 0; c3 < stubX.length; c3++) {
+          if (vempty[0].y+stubY[c3].y < 0 || vempty[0].y+stubY[c3].y > 3
+          || vempty[0].x+stubY[c3].x < 0 || vempty[0].x+stubY[c3].x > 3) {
+            continue;
+          }
+          if (field[vempty[0].y+stubY[c3].y][vempty[0].x+stubY[c3].x] == 0) {
+            /* Stub empty as well; complete L found! */
+            completeL = completeL.concat(vempty)
+            completeL = completeL.push({
+              x:vempty[0].x+stubX[c3].x,
+              y:vempty[0].y+stubX[c3].y
+            })
+            /* Now check if the complete L equals the own L piece */
+            if (isSameL(this.lPieces[this.curPlayer], completeL) == false) {
+              /* No winrar */
+              return false
+            }
+            completeL = new Array()
+          }
+        }
+        /*
+         * Go back one (actually two) step(s) in case it's like [ 0 0 0 0 ]
+         * Would be -1 if it weren't for the automatic increment
+         */
+        c2 -= 2
+        vempty = new Array()
+      } /* end of vertical candidate */
+
+    }
+  }
+
+  return true
+
 }
 
 /**
@@ -262,10 +427,10 @@ LaGameLogic.prototype.checkOutOfBounds = function(fields) {
 LaGameLogic.prototype.checkMoveAtAll = function(move) {
 
   if (
-  move.pos.x == this.field.lPieces[this.curPlayer].pos.x &&
-  move.pos.y == this.field.lPieces[this.curPlayer].pos.y &&
-  move.rot == this.field.lPieces[this.curPlayer].rot &&
-  move.inv == this.field.lPieces[this.curPlayer].inv
+  move.x == this.lPieces[this.curPlayer].x &&
+  move.y == this.lPieces[this.curPlayer].y &&
+  move.rot == this.lPieces[this.curPlayer].rot &&
+  move.inv == this.lPieces[this.curPlayer].inv
   ) {
   
     return { error:"nomove" }
@@ -285,7 +450,7 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
   /* First determine the fields with which the moved piece could collide. */
   var candidates = new Array();
   
-  if (move instanceof LPiece) {
+  if (move.type == "l") {
     /* 
      * If it's a L piece, it could collide with the opponent's L piece and
      * both N pieces.
@@ -294,12 +459,11 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
     /* We'll need that */
     var oppPlayer = makeOpposite(this.curPlayer)
     
-    candidates = candidates.concat(this.lPieces[oppPlayer].realise())
-    candidates.push(this.field.nPieces[0].realise())
-    candidates.push(this.field.nPieces[1].realise())
+    candidates = candidates.concat(realisePiece(this.lPieces[oppPlayer]))
+    candidates = candidates.concat(this.nPieces)
     
   }
-  else if (move instanceof NPiece) {
+  else if (move.type == "n") {
     /*
      * If it's a N piece, it could collide with both L pieces and the other
      * N piece.
@@ -308,9 +472,9 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
     /* We'll need that */
     var otherN = makeOpposite(move.nid)
     
-    candidates = candidates.concat(this.field.lPieces[0].realise())
-    candidates = candidates.concat(this.field.lPieces[1].realise())
-    candidates.push(this.field.nPieces[otherN].realise())
+    candidates = candidates.concat(realisePiece(this.lPieces[0]))
+    candidates = candidates.concat(realisePiece(this.lPieces[1]))
+    candidates.push(this.nPieces[otherN])
     
   }
 
