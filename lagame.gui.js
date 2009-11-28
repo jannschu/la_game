@@ -94,7 +94,7 @@ LaGameGUI.prototype.unsetNeutral = function(x, y) {
  * @param {Boolean} inversed true if the above should be flipped horizontal
  */
 LaGameGUI.prototype.setLPiece = function(x, y, rotation, inversed, player, choosing) {
-  var fields = realisePiece({x:x, y:y, rot:rotation, inv:inversed, type:"l"});
+  var fields = realisePiece({x:x, y:y, rot:rotation, inv:inversed, type:"l"}); /* FIXME */
   
   var ctx = this.canvas.getContext('2d');
   if (choosing) ctx.globalAlpha = 0.5;

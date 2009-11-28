@@ -7,7 +7,7 @@ function V2d(x, y) {
 }
 
 
-function V2d.prototype.add = function(rhs) {
+V2d.prototype.add = function(rhs) {
 
   this.x += rhs.x
   this.y += rhs.y
@@ -16,7 +16,7 @@ function V2d.prototype.add = function(rhs) {
 
 }
 
-function V2d.prototype.sub = function(rhs) {
+V2d.prototype.sub = function(rhs) {
 
   this.x -= rhs.x
   this.y -= rhs.y
@@ -25,7 +25,27 @@ function V2d.prototype.sub = function(rhs) {
 
 }
 
-function V2d.prototype.isEqual = function (rhs) {
+/* Field add */
+V2d.prototype.fadd = function (rhs) {
+  var tempX = this.x + rhs.x
+  var modRem = tempX % 4
+  var incrX = modRem
+  var incrY = (tempX-modRem)/4
+  
+  this.x += this.x + incrX
+  this.y += this.y + rhs.y + incrY
+  
+  return this
+}
+
+/* Field sub */
+V2d.prototype.fsub = function (rhs) {
+  this.fadd(new V2d(-rhs.x, -rhs.y))
+  
+  return this
+}
+
+V2d.prototype.isEqual = function (rhs) {
 
   if (this.x == rhs.x && this.y == rhs.y) {
     return true
@@ -34,3 +54,14 @@ function V2d.prototype.isEqual = function (rhs) {
   return false
 
 }
+
+V2d.prototype.isOob = function () {
+  
+  if (this.x < 0 || this.y < 0 || this.x > 3 || this.y > 3) {
+    return true
+  }
+  
+  return false
+  
+}
+

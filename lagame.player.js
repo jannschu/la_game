@@ -79,24 +79,12 @@ LaGamePlayer.choosePiece = function(e) {
   var y = e.pageY - this.offsetTop;
   var piece = this.currentPlayer.coordOverOwnGamePiece(x, y);
   if (piece) {
-    this.currentPlayer.movingPiece = LaGamePlayer.copyPiece(piece);
+    this.currentPlayer.movingPiece = piece.copy()
     this.currentPlayer.gui.canvas.style.cursor = 'default';
     this.currentPlayer.drawGameBoard();
   }
 };
 
-LaGamePlayer.copyPiece = function(piece) {
-  var newPiece = {type:piece.type, x:piece.x, y:piece.y};
-  if (piece.type == "l") {
-    newPiece.rot = piece.rot,
-    newPiece.inv = piece.inv
-    newPiece.player = piece.player
-  }
-  else if (piece.type == "n") {
-    newPiece.nid = piece.nid
-  }
-  return newPiece;
-};
 
 LaGamePlayer.gameKeyEvent = function(e) {
   if (!this.currentPlayer.doingMove || !this.currentPlayer.movingPiece)
@@ -123,32 +111,32 @@ LaGamePlayer.gameKeyEvent = function(e) {
     case 86: // V
       LaGamePlayer.inverseVertically(mp);
       break;
-    case 39: mp.x += 1; break; // Right
-    case 37: mp.x -= 1; break; // Left
-    case 38: mp.y -= 1; break; // Up
-    case 40: mp.y += 1; break; // Down
+    case 39: mp.pos.x += 1; break; // Right
+    case 37: mp.pos.x -= 1; break; // Left
+    case 38: mp.pos.y -= 1; break; // Up
+    case 40: mp.pos.y += 1; break; // Down
   }
   var mods = LaGamePlayer.moveOutOfBoxPiece(mp);
-  mp.x += mods.x;
-  mp.y += mods.y;
+
+  mp.add(mods)
   this.currentPlayer.drawGameBoard();
 };
 
 LaGamePlayer.inverseHorizontally = function(mp) {
-  if (mp.type != 'l') return;
+  if (!(mp instanceof LPiece)) return;
   var maxX = 0;
-  var fields = realisePiece(mp);
+  var fields = mp.realise();
   var x;
   for (var i = 0; i < fields.length; ++i) {
-    x = fields[i].x - mp.x;
+    x = fields[i].x - mp.pos.x;
     if (Math.abs(x) > Math.abs(maxX)) maxX = x;
   }
   mp.inv = !mp.inv;
-  mp.x += maxX;
+  mp.pos.x += maxX;
 };
 
 LaGamePlayer.inverseVertically = function(mp) {
-  if (mp.type != 'l') return;
+  if (!(mp instanceof LPiece)) return;
   LaGamePlayer.rotateLPiece(mp);
   LaGamePlayer.rotateLPiece(mp);
   LaGamePlayer.inverseHorizontally(mp);
@@ -159,29 +147,29 @@ LaGamePlayer.rotateLPiece = function(piece) {
   switch (piece.rot) {
     case 0:
       piece.rot = 1;
-      piece.x += inv ? -1 : 2;
+      piece.pos.x += inv ? -1 : 2;
       break;
     case 1:
       piece.rot = 2;
       if (inv) {
-        piece.x -= 1;
-        piece.y -= 1;
-      } else piece.y -= 1;
+        piece.pos.x -= 1;
+        piece.pos.y -= 1;
+      } else piece.pos.y -= 1;
       break;
     case 2:
       piece.rot = 3;
       if (inv) {
-        piece.x += 2;
-        piece.y -= 1;
+        piece.pos.x += 2;
+        piece.pos.y -= 1;
       } else {
-        piece.x -= 1;
-        piece.y -= 1;
+        piece.pos.x -= 1;
+        piece.pos.y -= 1;
       }
       break;
     case 3:
       piece.rot = 0;
-      piece.y += 2;
-      if (!inv) piece.x -= 1;
+      piece.pos.y += 2;
+      if (!inv) piece.pos.x -= 1;
       break;
   }
 };
@@ -217,7 +205,7 @@ LaGamePlayer.prototype.coordOverOwnGamePiece = function(x, y) {
   var fieldX, fieldY, j;
   for (var i = 0; i < pieces.length; ++i) {
     piece = pieces[i];
-    fields = realisePiece(piece);
+    fields = piece.realise();
     for (j = 0; j < fields.length; ++j) {
       field = fields[j];
       fieldX = field.x * fieldSum;
@@ -230,7 +218,7 @@ LaGamePlayer.prototype.coordOverOwnGamePiece = function(x, y) {
 };
 
 LaGamePlayer.moveOutOfBoxPiece = function(piece) {
-  var fields = realisePiece(piece);
+  var fields = piece.realise()
   var f, modX, modY;
   for (var i = 0; i < fields.length; ++i) {
     f = fields[i];
@@ -247,10 +235,11 @@ LaGamePlayer.moveOutOfBoxPiece = function(piece) {
 };
 
 LaGamePlayer.prototype.drawGameBoard = function() {
+  alert("drawing")
   this.gui.drawGameBoard();
   var fields = [];
   if (this.movingPiece) {
-    if (this.movingPiece.type == 'n') {
+    if (this.movingPiece instanceof NPiece) {
       var i = this.movingPiece.nid == 1 ? 0 : 1;
       fields.push(this.logic.getNPieces()[i]);
       fields = fields.concat(this.logic.getLPieces());
@@ -265,17 +254,21 @@ LaGamePlayer.prototype.drawGameBoard = function() {
   var field;
   for (var p = 0; p < fields.length; ++p) {
     field = fields[p];
-    if (field.type == 'n')
-      this.gui.setNeutral(field.x, field.y);
-    else
-      this.gui.setLPiece(field.x, field.y, field.rot, field.inv, field.player);
+    if (field instanceof NPiece) {
+      alert("f:"+field.pos.x+","+field.pos.y)
+      this.gui.setNeutral(field.pos.x, field.pos.y);
+    }
+    else {
+      this.gui.setLPiece(field.pos.x, field.pos.y, field.rot, field.inv, field.player);
+    }
   }
   var mp = this.movingPiece;
   if (mp) {
-    if (mp.type == 'n') {
-      this.gui.setNeutral(mp.x, mp.y, true);
+    if (mp instanceof NPiece) {
+      alert("mp:"+field.pos.x+","+field.pos.y)
+      this.gui.setNeutral(mp.pos.x, mp.pos.y, true);
     } else {
-      this.gui.setLPiece(mp.x, mp.y, mp.rot, mp.inv, mp.player, true);
+      this.gui.setLPiece(mp.pos.x, mp.pos.y, mp.pos.rot, mp.inv, mp.player, true);
     }
     /* debugging code
     var collisions = this.logic.isValidMove(mp);

@@ -25,7 +25,7 @@ LPiece.rVals = [
   [ new V2d(1,0), new V2d(0,1), new V2d(0,2) ]  // rot 3
 ]
 
-function LPiece.prototype.realise = function() {
+LPiece.prototype.realise = function() {
   
   if (this.cacheIsUpToDate() == true) {
     return this.cachedFields
@@ -51,7 +51,7 @@ function LPiece.prototype.realise = function() {
 
 }
 
-function LPiece.prototype.isSame = function(rhs) {
+LPiece.prototype.isSame = function(rhs) {
 
   var lhsFields = this.realise()
   var rhsFields = rhs.realise()
@@ -82,7 +82,7 @@ function LPiece.prototype.isSame = function(rhs) {
 /* ************************************************************************ */
 
 
-function LPiece.prototype.cacheIsUpToDate = function() {
+LPiece.prototype.cacheIsUpToDate = function() {
 
   if (this.cache == []) {
     return false
