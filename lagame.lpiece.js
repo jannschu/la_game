@@ -85,7 +85,7 @@ LPiece.prototype.isSame = function(rhs) {
 
 LPiece.prototype.cacheIsUpToDate = function() {
 
-  if (this.cachedFields == []) {
+  if (this.cachedFields.length == 0) {
     return false
   }
   
