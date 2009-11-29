@@ -41,3 +41,17 @@ legend {
 #author {
    font-size: small;
 }
+
+a {
+   color: #000987;
+   font-weight: bold;
+   text-decoration: none;
+}
+
+a:hover {
+   color: #454F9D;
+}
+
+a:visited {
+   font-weight: normal;
+}
