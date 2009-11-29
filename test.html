@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <!--
+   - This file is part of La Game.
+   - Copyright 2009 Shahriar Heidrich and Jannik Schürg
+   - 
+   - La Game is free software: you can redistribute it and/or modify
+   - it under the terms of the GNU General Public License as published by
+   - the Free Software Foundation, either version 3 of the License, or
+   - (at your option) any later version.
+   - 
+   - La Game is distributed in the hope that it will be useful,
+   - but WITHOUT ANY WARRANTY; without even the implied warranty of
+   - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   - GNU General Public License for more details.
+   - 
+   - You should have received a copy of the GNU General Public License
+   - along with La Game.  If not, see <http://www.gnu.org/licenses/>. 
+  -->
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" href="style.css" type="text/css">
+  <script type="text/javascript" src="lagame.tools.js"></script>
+  <script type="text/javascript" src="lagame.math.js"></script>
+  <script type="text/javascript" src="lagame.lpiece.js"></script>
+  <script type="text/javascript" src="lagame.npiece.js"></script>
+  <script type="text/javascript" src="lagame.field.js"></script>
+  <script type="text/javascript" src="lagame.gui.js"></script>
+  <script type="text/javascript" src="lagame.player.js"></script>
+  <script type="text/javascript" src="lagame.logic.js"></script>
+  <script type="text/javascript">
+    window.onload = function() {
+    mField = new LaGameField()
+    emptyLs = mField.getEmptyLs(0, 100)
+    var outp = "\n"
+    for (var c1 = 0; c1 < emptyLs.length; c1++) {
+      outp += ("bar:"+emptyLs[c1].barStart.y+","+emptyLs[c1].barStart.x+"\nstub:"+emptyLs[c1].stub.y+","+emptyLs[c1].barStart.x+"\n")
+    }
+    alert(outp)
+    }
+    /*function newGame() {
+      var playerLabel = document.getElementById('currentPlayer');
+      var nextPlayer = document.getElementById('nextPlayer');
+      var canvas = document.getElementById('laGameCanvas');
+      
+      var gui = new LaGameGUI(canvas, playerLabel, nextPlayer);
+      var logic = new LaGameLogic(gui, LaGamePlayer, LaGamePlayer);
+      
+      gui.setPlayerLabel('Spieler 1 beginnt', 0);
+      gui.setCanFinishTurn(false);
+      
+      document.getElementById('nextPlayer').addEventListener('click', function() {
+        logic.finishTurn();
+      }, false)
+      
+      logic.initializeGame();
+    }
+    
+    window.onload = function() {
+      document.getElementById('newGame').addEventListener('click', function() {
+        if (window.confirm('Wirklich das Spiel neustarten?'))
+          newGame();
+      }, false);
+      newGame();
+    }*/
+  </script>
+  <title>La Game</title>
+</head>
+<body>
+  <h1>La Game</h1>
+  <p>
+    Das <a href="http://www.edwdebono.com/debono/lgame.htm">L-Spiel</a>
+    von <a href="http://www.edwdebono.com/">Edward de Bono</a> in JavaScript/Canvas.
+  </p>
+  <canvas width="400" height="400" id="laGameCanvas"></canvas>
+  <fieldset>
+    <legend>Spiel</legend>
+    <select name="versusMode" id="versusMode">
+      <option value="">Mensch gegen Mensch</option>
+    </select>
+    <input type="button" name="newGame" value="Neues Spiel" id="newGame">
+    <input type="button" name="nextPlayer" value="Nächster Spieler" id="nextPlayer">
+    <p id="gameInfo">
+      <strong id="currentPlayer">Spieler 1 beginnt</strong>. Wähle die Steine per 
+      <code>Klick</code> aus, bewege sie mit den <code>Pfeiltasten</code> und platziere den Stein mit <code>Enter</code>.
+      Die <code>Leertaste</code> kannst du benutzen um Steine zu drehen.
+      Die Taste <code>B</code> dreht den Stein horizontal und <code>V</code> vertikal.
+    </p>
+  </fieldset>
+  <p id="author">
+    Shahriar M. Heidrich und Jannik Schürg (2009)<br>
+    Quellcode auf <a href="http://github.com/jannschu/la_game">Github</a>
+    zu finden, <a href="http://www.gnu.org/licenses/gpl.html">GPL Lizenz</a>.
+  </p>
+</body>
+</html>
