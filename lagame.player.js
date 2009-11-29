@@ -39,10 +39,11 @@ function LaGamePlayer(playerNumber, gui, logic) {
       if (player.doingMove && player.movingPiece && player.dragging)
         player.drag(e)
     },
-    exitDrag: function(e) {
-      if (e.keyCode) {
-        if (e.keyCode == 27) player.exitDragging()
-      } else player.exitDragging();
+    exitChoose: function(e) {
+      if (e.keyCode == 27) player.exitChoose()
+    },
+    mouseOut: function(e) {
+      player.mouseMovedOut();
     },
     choose: function(e) { player.choosePiece(e) }
   }
@@ -66,16 +67,18 @@ LaGamePlayer.prototype.startMoving = function(l, neutral, callback) {
 // notRedraw: true will not draw it, false will draw it
 LaGamePlayer.prototype.retryMove = function(notRedraw) {
   var mp = this.canMoveL && !this.canMoveNeutral ? this.movingPiece : null;
-  this.stopMoving(notRedraw, mp);
+  this.stopMoving(!notRedraw);
+  this.movingPiece = mp;
   this.doingMove = true;
+  if (!notRedraw) this.drawGameBoard();
   this.registerChooseEvents();
 };
 
-LaGamePlayer.prototype.stopMoving = function(notRedraw, newMovingPiece) {
+LaGamePlayer.prototype.stopMoving = function(notRedraw) {
   this.unregisterEvents();
   this.doingMove = false;
   this.dragging = false;
-  this.movingPiece = newMovingPiece;
+  this.movingPiece = null;
   this.draggedFields = [];
   if (!notRedraw) this.drawGameBoard();
 };
@@ -96,8 +99,8 @@ LaGamePlayer.prototype.unregisterEvents = function() {
   this.gui.canvas.removeEventListener('mousemove', this.eventFunctions.drag, false);
   this.gui.canvas.removeEventListener('mouseup', this.eventFunctions.stopDrag, false);
   this.gui.canvas.removeEventListener('mousedown', this.eventFunctions.startDrag, false);
-  document.removeEventListener('keydown', this.eventFunctions.exitDrag, false);
-  this.gui.canvas.removeEventListener('mouseout', this.eventFunctions.exitDrag, false);
+  document.removeEventListener('keydown', this.eventFunctions.exitChoose, false);
+  this.gui.canvas.removeEventListener('mouseout', this.eventFunctions.mouseOut, false);
 };
 
 LaGamePlayer.prototype.arrangeDragEvents = function() {
@@ -107,8 +110,8 @@ LaGamePlayer.prototype.arrangeDragEvents = function() {
   this.gui.canvas.addEventListener('mouseup', this.eventFunctions.stopDrag, false);
   this.gui.canvas.addEventListener('mousedown', this.eventFunctions.startDrag, false);
   this.gui.canvas.addEventListener('mousemove', this.eventFunctions.drag, false);
-  document.addEventListener('keydown', this.eventFunctions.exitDrag, false);
-  this.gui.canvas.addEventListener('mouseout', this.eventFunctions.exitDrag, false);
+  document.addEventListener('keydown', this.eventFunctions.exitChose, false);
+  this.gui.canvas.addEventListener('mouseout', this.eventFunctions.mouseOut, false);
 }
 
 /*****************************************************************************/
@@ -174,31 +177,34 @@ LaGamePlayer.prototype.drag = function(e) {
 
 LaGamePlayer.prototype.stopDragging = function(e) {
   if (!this.doingMove || !this.movingPiece) return;
-  this.dragging = false;
+  
   if (this.movingPiece.type == 'n') {
     var pos = this.mousePosToCanvasPosition(e);
     this.movingPiece.x = pos.x;
     this.movingPiece.y = pos.y;
     this.callEndCallback(this.movingPiece);
-    this.exitDragging();
-  } else if (this.movingPiece.type == 'l' && this.draggedFields.length == 4) {
+  } else if (this.movingPiece.type == 'l') {
     var pos = this.mousePosToCanvasPosition(e);
-    if (this.coordOverOwnGamePiece(pos, this.draggedFields)) { // ends drag over field
+    var mouseOverL = this.coordOverOwnGamePiece(pos, this.draggedFields);
+    if (this.draggedFields.length == 4 && mouseOverL) {
+      this.dragging = false;
       var condensedForm = this.getCondensedLPieceFor(this.draggedFields);
       this.callEndCallback(condensedForm);
-      this.exitDragging();
       return;
+    } else {
+      this.retryMove();
     }
   }
-  if (this.movingPiece.type == 'l') {
-    this.dragging = true;
-    this.retryMove();
-  } else this.exitDragging();
 }
 
-LaGamePlayer.prototype.exitDragging = function() {
-  if (!this.doingMove) return;
-  if (this.dragging || this.movingPiece.type == 'n') this.retryMove(false);
+LaGamePlayer.prototype.exitChoose = function() {
+  if (this.dragging || !this.movingPiece) return;
+  if (this.movingPiece.type == 'n') this.retryMove(false);
+};
+
+LaGamePlayer.prototype.mouseMovedOut = function() {
+  if (!this.movingPiece) return;
+  if (this.dragging) this.retryMove(false);
 };
 
 /*****************************************************************************/
@@ -363,22 +369,28 @@ LaGamePlayer.prototype.getNonEmptyPieces = function() {
   return pieces;
 };
 
-LaGamePlayer.prototype.coordOverOwnGamePiece = function(pos, additonalFields) {
-  var pieces = [];
-  if (this.canMoveNeutral) pieces = pieces.concat(this.logic.getNPieces());
-  if (this.canMoveL) pieces.push(this.logic.getLPieces()[this.playerNumber]);
-  var piece, fields, field;
-  var j;
-  for (var i = 0; i < pieces.length; ++i) {
-    piece = pieces[i];
-    fields = realisePiece(piece);
-    if (i == 0 && additonalFields) fields = fields.concat(additonalFields);
+LaGamePlayer.prototype.coordOverOwnGamePiece = function(pos, replacingGameFields) {
+  var checkFields = function(fields) {
+    var field;
     for (j = 0; j < fields.length; ++j) {
       field = fields[j];
-      if (pos.x == field.x && pos.y == field.y) return piece;
+      if (pos.x == field.x && pos.y == field.y) return true;
     }
+    return false;
   }
-  return false;
+  if (!replacingGameFields) {
+    var pieces = [];
+    if (this.canMoveNeutral) pieces = pieces.concat(this.logic.getNPieces());
+    if (this.canMoveL) pieces.push(this.logic.getLPieces()[this.playerNumber]);
+    var piece, check;
+    for (var i = 0; i < pieces.length; ++i) {
+      piece = pieces[i];
+      if (checkFields(realisePiece(piece))) return piece;
+    }
+    return false;
+  } else {
+    return checkFields(replacingGameFields);
+  }
 };
 
 LaGamePlayer.prototype.drawGameBoard = function() {
