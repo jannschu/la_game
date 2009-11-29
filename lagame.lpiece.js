@@ -32,7 +32,7 @@ LPiece.prototype.realise = function() {
     return this.cachedFields
   }
   
-  var fields = [ new V2d(this.x, this.y) ]
+  var fields = [ new V2d(this.pos.x, this.pos.y) ]
   var curRVals = LPiece.rVals[this.rot]
   var invMul = 1
   if (this.inv == true) {
@@ -42,7 +42,7 @@ LPiece.prototype.realise = function() {
   var curField
   
   for (var c1 = 0; c1 < curRVals.length; c1++) {
-    curField = curRVals.copy()
+    curField = curRVals[c1].copy()
     curField.x *= invMul
     curField.add(this.pos)
     fields.push(curField)
