@@ -42,7 +42,7 @@ LPiece.prototype.realise = function() {
   var curField
   
   for (var c1 = 0; c1 < curRVals.length; c1++) {
-    curField = rVals.copy()
+    curField = curRVals.copy()
     curField.x *= invMul
     curField.add(this.pos)
     fields.push(curField)
