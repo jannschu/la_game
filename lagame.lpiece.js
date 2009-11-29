@@ -16,7 +16,7 @@ function LPiece(pos, rot, inv, player) {
   /* Cache */
   this.cachedFields = []
   this.cachedVals = {pos: pos, rot: rot, inv: inv}
-  this.realise()
+
 }
 
 LPiece.rVals = [
@@ -85,7 +85,7 @@ LPiece.prototype.isSame = function(rhs) {
 
 LPiece.prototype.cacheIsUpToDate = function() {
 
-  if (this.cache == []) {
+  if (this.cachedFields == []) {
     return false
   }
   
