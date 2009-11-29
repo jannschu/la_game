@@ -16,6 +16,7 @@ function LPiece(pos, rot, inv, player) {
   /* Cache */
   this.cachedFields = []
   this.cachedVals = {pos: pos, rot: rot, inv: inv}
+  this.realise()
 }
 
 LPiece.rVals = [
