@@ -48,7 +48,8 @@ LaGameField.prototype.getOcc = function(candidates) {
   
   for (var c1 = 0; c1 < allPieceFields.length; c1++) {
   
-    field[allPieceFields[c1].x][allPieceFields[c1].y] = 1
+    //field[allPieceFields[c1].x][allPieceFields[c1].y] = 1
+    field[allPieceFields[c1].x] = 1
   
   }
   
@@ -56,14 +57,14 @@ LaGameField.prototype.getOcc = function(candidates) {
 
 }
 
-LaGameField.prototype.lStubs = [
+LaGameField.lStubs = [
   new V2d(0,-1), new V2d(0,1),
   new V2d(2,-1), new V2d(2,1)
 ]
 
 LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
 
-  var candidates = [ this.lPieces[makeOpposite(excludeLid)] ]
+  var candidates = new Array( this.lPieces[makeOpposite(excludeLid)] )
   candidates = candidates.concat(this.nPieces)
   
   var field = this.getOcc(candidates)
@@ -111,7 +112,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
       
       for (var c1 = 0; c1 < lCands.length; lCands++) {
         if (!this.lPieces[excludeLid].isSame(lCands[c1])) {
-          foundLs.push(lCands[c1])
+          foundLs.push({stub:lCands[c1],barStart:curBar[0]})
           if (foundLs.length == stopAfter) {
             return foundLs
           }
@@ -161,7 +162,7 @@ LaGameField.prototype.findHBar = function(occField, startAt) {
 
 LaGameField.prototype.checkBarLs = function(occField, barStart, stopAfter) {
 
-  lStubs = LaGame.lStubs
+  lStubs = LaGameField.lStubs
   var curPos = new V2d()
   
   var matchLStubs = new Array()
@@ -181,7 +182,7 @@ LaGameField.prototype.checkBarLs = function(occField, barStart, stopAfter) {
     }
   }
   
-  return foundLs;
+  return matchLStubs
 
 }
 
