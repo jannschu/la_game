@@ -110,7 +110,7 @@ LaGamePlayer.prototype.arrangeDragEvents = function() {
   this.gui.canvas.addEventListener('mouseup', this.eventFunctions.stopDrag, false);
   this.gui.canvas.addEventListener('mousedown', this.eventFunctions.startDrag, false);
   this.gui.canvas.addEventListener('mousemove', this.eventFunctions.drag, false);
-  document.addEventListener('keydown', this.eventFunctions.exitChose, false);
+  document.addEventListener('keydown', this.eventFunctions.exitChoose, false);
   this.gui.canvas.addEventListener('mouseout', this.eventFunctions.mouseOut, false);
 }
 
