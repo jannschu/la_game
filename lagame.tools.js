@@ -21,7 +21,8 @@ Object.prototype.copy = function() {
     var copy = {};
     copy.__proto__ = this.__proto__;
     for (var p in this)
-      if (this.hasOwnProperty(p)) copy[p] = this[p].copy();
+      if (this.hasOwnProperty(p)) copy[p] = 
+        typeof this[p] == 'object' ? this[p].copy() : this[p];
     return copy;
   } else return this;
 }
