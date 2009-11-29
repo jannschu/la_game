@@ -56,6 +56,7 @@ LaGamePlayer.prototype.stopMoving = function() {
 /*****************************************************************************/
 
 LaGamePlayer.prototype.registerEvents = function() {
+  alert("registering")
   this.gui.canvas.currentPlayer = this;
   document.currentPlayer = this;
   this.gui.canvas.addEventListener('mousemove', LaGamePlayer.canvasPointer, false);
@@ -70,6 +71,7 @@ LaGamePlayer.prototype.unregisterEvents = function() {
 };
 
 LaGamePlayer.choosePiece = function(e) {
+  alert("choosing")
   if (!this.currentPlayer.doingMove) {
     this.currentPlayer.unregisterEvents();
     return;
@@ -87,6 +89,7 @@ LaGamePlayer.choosePiece = function(e) {
 
 
 LaGamePlayer.gameKeyEvent = function(e) {
+  alert("keyevent")
   if (!this.currentPlayer.doingMove || !this.currentPlayer.movingPiece)
     return;
   
