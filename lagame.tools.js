@@ -31,11 +31,11 @@ Array.prototype.copy = function() {
   return copyArray;
 };
 
-var refCopy = function() { return this };
+var valCopy = function() { return this };
 
-Number.prototype.copy = refCopy;
-String.prototype.copy = refCopy;
-Boolean.prototype.copy = refCopy;
+Number.prototype.copy = valCopy;
+String.prototype.copy = valCopy;
+Boolean.prototype.copy = valCopy;
 
 /* 
  * Fields for all possible L-Piece positions
