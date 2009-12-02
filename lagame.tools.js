@@ -21,7 +21,7 @@ Array.prototype.copy = function() {
   var e;
   for (var i = 0; i < this.length; ++i) {
     e = this[i];
-    if (e !== undefined && e !== null && e !== false && e !== true) {
+    if (e !== undefined && e !== null) {
       // if (!this[i].copy) console.log(this[i])
       copyArray[i] = e.copy();
     } else {
