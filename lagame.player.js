@@ -22,11 +22,32 @@ function LaGamePlayer(playerNumber, gui, logic) {
   this.logic = logic; // public
   
   this.doingMove = false; // public
-  this.movingPiece = null; // public
+  this.movingPiece = null;
+  this.dragging = false;
+  this.draggedFields = []; // public
   this.endMoveCallback = null;
   
   this.canMoveL = false; // public
   this.canMoveNeutral = false; // public
+  
+  var player = this;
+  this.eventFunctions = {
+    canvasPointer: function(e) { player.canvasPointer(e) },
+    stopDrag: function(e) { player.stopDragging(e) },
+    startDrag: function(e) { player.startDragging(e) },
+    drag: function(e) { 
+      if (player.doingMove && player.movingPiece && player.dragging)
+        player.drag(e)
+    },
+    exitChoose: function(e) {
+      if (e.keyCode == 27) player.exitChoose()
+    },
+    mouseOut: function(e) {
+      player.mouseMovedOut();
+    },
+    choose: function(e) { player.choosePiece(e) }
+  }
+  
 };
 
 LaGamePlayer.prototype.startMoving = function(l, neutral, callback) {
@@ -41,216 +62,354 @@ LaGamePlayer.prototype.startMoving = function(l, neutral, callback) {
   
   this.doingMove = true;
   
-  this.registerEvents();
+  this.registerChooseEvents();
+};
+// notRedraw: true will not draw it, false will draw it
+LaGamePlayer.prototype.retryMove = function(notRedraw) {
+  var mp = this.canMoveL && !this.canMoveNeutral ? this.movingPiece : null;
+  this.stopMoving(!notRedraw);
+  this.movingPiece = mp;
+  this.doingMove = true;
+  if (!notRedraw) this.drawGameBoard();
+  this.registerChooseEvents();
 };
 
-LaGamePlayer.prototype.stopMoving = function() {
+LaGamePlayer.prototype.stopMoving = function(notRedraw) {
   this.unregisterEvents();
   this.doingMove = false;
+  this.dragging = false;
   this.movingPiece = null;
-  this.drawGameBoard();
+  this.draggedFields = [];
+  if (!notRedraw) this.drawGameBoard();
 };
 
 /*****************************************************************************/
 /*                                PRIVATE                                    */
 /*****************************************************************************/
 
-LaGamePlayer.prototype.registerEvents = function() {
-  alert("registering")
-  this.gui.canvas.currentPlayer = this;
-  document.currentPlayer = this;
-  this.gui.canvas.addEventListener('mousemove', LaGamePlayer.canvasPointer, false);
-  this.gui.canvas.addEventListener('click', LaGamePlayer.choosePiece, false);
-  document.addEventListener('keydown', LaGamePlayer.gameKeyEvent, false);
+LaGamePlayer.prototype.registerChooseEvents = function() {
+  this.gui.canvas.addEventListener('mousemove', this.eventFunctions.canvasPointer, false);
+  this.gui.canvas.addEventListener('click', this.eventFunctions.choose, false);
 };
 
 LaGamePlayer.prototype.unregisterEvents = function() {
-  this.gui.canvas.removeEventListener('mousemove', LaGamePlayer.canvasPointer, false);
-  this.gui.canvas.removeEventListener('click', LaGamePlayer.choosePiece, false);
-  document.removeEventListener('keydown', LaGamePlayer.gameKeyEvent, false);
+  this.gui.canvas.removeEventListener('mousemove', this.eventFunctions.canvasPointer, false);
+  this.gui.canvas.removeEventListener('click', this.eventFunctions.choose, false);
+  
+  this.gui.canvas.removeEventListener('mousemove', this.eventFunctions.drag, false);
+  this.gui.canvas.removeEventListener('mouseup', this.eventFunctions.stopDrag, false);
+  this.gui.canvas.removeEventListener('mousedown', this.eventFunctions.startDrag, false);
+  document.removeEventListener('keydown', this.eventFunctions.exitChoose, false);
+  this.gui.canvas.removeEventListener('mouseout', this.eventFunctions.mouseOut, false);
 };
 
-LaGamePlayer.choosePiece = function(e) {
-  alert("choosing")
-  if (!this.currentPlayer.doingMove) {
-    this.currentPlayer.unregisterEvents();
+LaGamePlayer.prototype.arrangeDragEvents = function() {
+  this.gui.canvas.removeEventListener('click', this.eventFunctions.choose, false);
+  this.gui.canvas.removeEventListener('mousemove', this.eventFunctions.canvasPointer, false);
+  
+  this.gui.canvas.addEventListener('mouseup', this.eventFunctions.stopDrag, false);
+  this.gui.canvas.addEventListener('mousedown', this.eventFunctions.startDrag, false);
+  this.gui.canvas.addEventListener('mousemove', this.eventFunctions.drag, false);
+  document.addEventListener('keydown', this.eventFunctions.exitChoose, false);
+  this.gui.canvas.addEventListener('mouseout', this.eventFunctions.mouseOut, false);
+}
+
+/*****************************************************************************/
+/*                                 EVENTS                                    */
+/*****************************************************************************/
+
+LaGamePlayer.prototype.choosePiece = function(e) {
+  if (!this.doingMove) return;
+  if (this.movingPiece) {
+    this.arrangeDragEvents();
     return;
   }
-  if (this.currentPlayer.movingPiece) return;
-  var x = e.pageX - this.offsetLeft;
-  var y = e.pageY - this.offsetTop;
-  var piece = this.currentPlayer.coordOverOwnGamePiece(x, y);
+  var pos = this.mousePosToCanvasPosition(e);
+  var piece = this.coordOverOwnGamePiece(pos);
   if (piece) {
-    this.currentPlayer.movingPiece = piece.copy()
-    this.currentPlayer.gui.canvas.style.cursor = 'default';
-    this.currentPlayer.drawGameBoard();
+    this.movingPiece = this.copyPiece(piece);
+    this.gui.canvas.style.cursor = 'default';
+    this.arrangeDragEvents();
+    this.drawGameBoard();
   }
-};
+}
 
-
-LaGamePlayer.gameKeyEvent = function(e) {
-  alert("keyevent")
-  if (!this.currentPlayer.doingMove || !this.currentPlayer.movingPiece)
+LaGamePlayer.prototype.canvasPointer = function(c) {
+  if (!this.doingMove) return;
+  if (this.movingPiece) {
+    this.arrangeDragEvents();
     return;
+  }
   
-  var mp = this.currentPlayer.movingPiece;
-  switch (e.keyCode) {
-    case 13: // Enter
-      if (!mp) return;
-      if (this.currentPlayer.logic.isValidMove(mp).error != "none") return;
-      var callback = this.currentPlayer.endMoveCallback;
-      if (callback) {
-        window.setTimeout(function() {
-          callback(mp);
-        }, 0);
-      }
-      return;
-    case 32: // Space bar
-      LaGamePlayer.rotateLPiece(mp);
-      break;
-    case 66: // B
-      LaGamePlayer.inverseHorizontally(mp);
-      break;
-    case 86: // V
-      LaGamePlayer.inverseVertically(mp);
-      break;
-    case 39: mp.pos.x += 1; break; // Right
-    case 37: mp.pos.x -= 1; break; // Left
-    case 38: mp.pos.y -= 1; break; // Up
-    case 40: mp.pos.y += 1; break; // Down
-  }
-  var mods = LaGamePlayer.moveOutOfBoxPiece(mp);
-
-  mp.add(mods)
-  this.currentPlayer.drawGameBoard();
-};
-
-LaGamePlayer.inverseHorizontally = function(mp) {
-  if (!(mp instanceof LPiece)) return;
-  var maxX = 0;
-  var fields = mp.realise();
-  var x;
-  for (var i = 0; i < fields.length; ++i) {
-    x = fields[i].x - mp.pos.x;
-    if (Math.abs(x) > Math.abs(maxX)) maxX = x;
-  }
-  mp.inv = !mp.inv;
-  mp.pos.x += maxX;
-};
-
-LaGamePlayer.inverseVertically = function(mp) {
-  if (!(mp instanceof LPiece)) return;
-  LaGamePlayer.rotateLPiece(mp);
-  LaGamePlayer.rotateLPiece(mp);
-  LaGamePlayer.inverseHorizontally(mp);
-};
-
-LaGamePlayer.rotateLPiece = function(piece) {
-  var inv = !!piece.inv;
-  switch (piece.rot) {
-    case 0:
-      piece.rot = 1;
-      piece.pos.x += inv ? -1 : 2;
-      break;
-    case 1:
-      piece.rot = 2;
-      if (inv) {
-        piece.pos.x -= 1;
-        piece.pos.y -= 1;
-      } else piece.pos.y -= 1;
-      break;
-    case 2:
-      piece.rot = 3;
-      if (inv) {
-        piece.pos.x += 2;
-        piece.pos.y -= 1;
-      } else {
-        piece.pos.x -= 1;
-        piece.pos.y -= 1;
-      }
-      break;
-    case 3:
-      piece.rot = 0;
-      piece.pos.y += 2;
-      if (!inv) piece.pos.x -= 1;
-      break;
-  }
-};
-
-LaGamePlayer.canvasPointer = function(c) {
-  if (!this.currentPlayer.doingMove) {
-    this.currentPlayer.unregisterEvents();
-    return;
-  }
-  if (this.currentPlayer.movingPiece) {
-    removeEventListener('mousemove', LaGamePlayer.canvasPointer, false);
-    this.removeEventListener('mousemove', LaGamePlayer.canvasPointer, false);
-    return;
-  }
-  var x = c.pageX - this.offsetLeft;
-  var y = c.pageY - this.offsetTop;
+  var pos = this.mousePosToCanvasPosition(c);
   
-  if (this.currentPlayer.coordOverOwnGamePiece(x, y)) {
-    this.style.cursor = 'pointer';
+  if (this.coordOverOwnGamePiece(pos)) {
+    this.gui.canvas.style.cursor = 'pointer';
   } else {
-    this.style.cursor = 'default';
+    this.gui.canvas.style.cursor = 'default';
   }
 };
 
-LaGamePlayer.prototype.coordOverOwnGamePiece = function(x, y) {
+LaGamePlayer.prototype.startDragging = function(e) {
+  if (!this.doingMove || !this.movingPiece || this.movingPiece.type == 'n')
+    return;
+  this.dragging = true;
+}
+
+LaGamePlayer.prototype.drag = function(e) {
+  if (this.movingPiece.type == 'n') return;
+  if (this.draggedFields.length >= 4) return;
+  var pos = this.mousePosToCanvasPosition(e);
+  var include = false;
+  var field;
+  for (var i = 0; i < this.draggedFields.length; ++i) {
+    field = this.draggedFields[i];
+    if (field.x == pos.x && field.y == pos.y) {
+      include = true;
+      break;
+    }
+  }
+  if (!include && this.isValidPosition(pos)) {
+    this.draggedFields.push(pos);
+    this.drawGameBoard();
+  }
+};
+
+LaGamePlayer.prototype.stopDragging = function(e) {
+  if (!this.doingMove || !this.movingPiece) return;
+  
+  if (this.movingPiece.type == 'n') {
+    var pos = this.mousePosToCanvasPosition(e);
+    this.movingPiece.x = pos.x;
+    this.movingPiece.y = pos.y;
+    this.callEndCallback(this.movingPiece);
+  } else if (this.movingPiece.type == 'l') {
+    var pos = this.mousePosToCanvasPosition(e);
+    var mouseOverL = this.coordOverOwnGamePiece(pos, this.draggedFields);
+    if (this.draggedFields.length == 4 && mouseOverL) {
+      this.dragging = false;
+      var condensedForm = this.getCondensedLPieceFor(this.draggedFields);
+      this.callEndCallback(condensedForm);
+      return;
+    } else {
+      this.retryMove();
+    }
+  }
+}
+
+LaGamePlayer.prototype.exitChoose = function() {
+  if (this.dragging || !this.movingPiece) return;
+  if (this.movingPiece.type == 'n') this.retryMove(false);
+};
+
+LaGamePlayer.prototype.mouseMovedOut = function() {
+  if (!this.movingPiece) return;
+  if (this.dragging) this.retryMove(false);
+};
+
+/*****************************************************************************/
+/*                                HELPER                                     */
+/*****************************************************************************/
+
+LaGamePlayer.prototype.fieldIsEmpty = function(test) {
+  var pieces = [].concat(this.logic.getNPieces());
+  pieces.push(this.logic.getLPieces()[makeOpposite(this.playerNumber)]);
+  
+  var j, fields;
+  for (var i = 0; i < pieces.length; ++i) {
+    fields = realisePiece(pieces[i]);
+    for (j = 0; j < fields.length; ++j) {
+      if (fields[j].x == test.x && fields[j].y == test.y) return false;
+    }
+  }
+  return true;
+};
+
+LaGamePlayer.prototype.isValidPosition = function(pos) {
+  if (!this.fieldIsEmpty(pos)) return false;
+  var fields = this.draggedFields;
+  var exists = function(test) {
+    for (var i = 0; i < fields.length; ++i) {
+      if (fields[i].x == test.x && fields[i].y == test.y) return true;
+    }
+    return false;
+  }
+  if (this.draggedFields.length == 0) return true;
+  if (exists({x:pos.x+1, y:pos.y}) ||
+    exists({x:pos.x-1, y:pos.y}) ||
+    exists({x:pos.x, y:pos.y+1}) ||
+    exists({x:pos.x, y:pos.y-1})) return this.canBeValidLPiece([pos].concat(fields));
+  else return false;
+};
+
+LaGamePlayer.prototype.getCondensedLPieceFor = function(fields) {
+  var a = fields[0];
+  var b = fields[1];
+  var c = fields[2];
+  var d = fields[3];
+  var isDiagonal = function(a, b) {
+    return Math.abs(a.x - b.x) == 1 && Math.abs(a.y - b.y) == 1;
+  }
+  var isPair = function(a, b) {
+    return (a.x == b.x && Math.abs(a.y - b.y) == 1) ||
+      (a.y == b.y && Math.abs(a.x - b.x) == 1)
+  }
+  var piece = {player: this.playerNumber, type: 'l'};
+  var perms = [[a, b, c, d], [a, c, b, d], [a, d, b, c], [b, c, d, a], [b, d, a, c], [c, d, a, b]];
+  var x, y, longTailEnd, shortTailEnd, nr, p;
+  for (var i = 0; i < 6; ++i) {
+    p = perms[i];
+    if (isDiagonal(p[0], p[1])) {
+      nr = (isPair(p[2], p[0]) && isPair(p[2], p[1])) ? 2 : 3
+      x = p[nr].x
+      y = p[nr].y
+      longTailEnd = nr == 3 ? p[2] : p[3];
+      shortTailEnd = (isPair(longTailEnd, p[0])) ? p[1] : p[0];
+      break;
+    }
+  }
+  if (x == undefined) return false;
+  piece.x = x;
+  piece.y = y;
+  if (shortTailEnd.x == piece.x) { // rot 0 or 2
+    if (shortTailEnd.y < piece.y) {
+      piece.rot = 0;
+      piece.inv = longTailEnd.x < piece.x;
+    } else {
+      piece.rot = 2;
+      piece.inv = longTailEnd.x > piece.x;
+    }
+  } else { // rot 1 or 3
+    if (longTailEnd.y < piece.y) {
+      piece.rot = 1;
+      piece.inv = shortTailEnd.x > piece.x;
+    } else {
+      piece.rot = 3;
+      piece.inv = shortTailEnd.x < piece.x;
+    }
+  }
+  return piece;
+};
+
+LaGamePlayer.prototype.canBeValidLPiece = function(fields) {
+  if (fields.length < 2) return true;
+  if (fields.length > 4) return false;
+  var isPair = function(a, b) {
+    return (a.x == b.x && Math.abs(a.y - b.y) == 1) ||
+      (a.y == b.y && Math.abs(a.x - b.x) == 1)
+  }
+  var isDiagonal = function(a, b) {
+    return Math.abs(a.x - b.x) == 1 && Math.abs(a.y - b.y) == 1;
+  }
+  var isEdge = function(a, b, c) {
+    var perms = [[a, b, c], [c, a, b], [b, c, a]];
+    var p;
+    for (var i = 0; i < 3; ++i) {
+      p = perms[i];
+      if (isDiagonal(p[0], p[1]) && isPair(p[0], p[2]) && isPair(p[2], p[1]))
+        return true;
+    }
+    return false;
+  }
+  var isLine = function(a, b, c) {
+    return (a.x == b.x && b.x == c.x && (a.y + b.y + c.y) % 3 == 0) || 
+      (a.y == b.y && b.y == c.y && (a.x + b.x + c.x) % 3 == 0)
+  };
+  var isL = function(a, b, c, d) {
+    var perms = [[a, b, c, d], [a, c, b, d], [a, d, b, c], [b, c, d, a], [b, d, a, c], [c, d, a, b]];
+    var p;
+    for (var i = 0; i < 6; ++i) {
+      p = perms[i];
+      if (isDiagonal(p[0], p[1])) {
+        if ((isPair(p[0], p[2]) || isPair(p[1], p[2])) && 
+          isPair(p[0], p[3]) && isPair(p[1], p[3])) return !isDiagonal(p[2], p[3]);
+        else if ((isPair(p[0], p[3]) || isPair(p[1], p[3])) &&
+          isPair(p[0], p[2]) && isPair(p[1], p[2])) return !isDiagonal(p[2], p[3]);
+      }
+    }
+    return false;
+  }
+  var player = this;
+  var notOldLPiece = function(fields) {
+    var cond = player.getCondensedLPieceFor(fields);
+    var old = player.logic.getLPieces()[player.playerNumber];
+    return cond.x != old.x || cond.y != old.y || cond.rot != old.rot || cond.inv != old.inv
+  }
+  switch (fields.length) {
+    case 2: return isPair(fields[0], fields[1]);
+    case 3: return isLine(fields[0], fields[1], fields[2]) ||
+      isEdge(fields[0], fields[1], fields[2]);
+    case 4: return isL(fields[0], fields[1], fields[2], fields[3]) && notOldLPiece(fields);
+  }
+};
+
+LaGamePlayer.prototype.callEndCallback = function(newPiece) {
+  var callback = this.endMoveCallback;
+  if (callback)
+    window.setTimeout(function() { callback(newPiece) }, 0);
+};
+
+LaGamePlayer.prototype.copyPiece = function(piece) {
+  var newPiece = {};
+  for (p in piece)
+    newPiece[p] = piece[p];
+  return newPiece;
+};
+
+LaGamePlayer.prototype.mousePosToCanvasPosition = function(e) {
+  var x = e.pageX - this.gui.canvas.offsetLeft;
+  var y = e.pageY - this.gui.canvas.offsetTop;
+  return this.gui.coordToPoint(x, y)
+}
+
+LaGamePlayer.prototype.getNonEmptyPieces = function() {
   var pieces = [];
   if (this.canMoveNeutral) pieces = pieces.concat(this.logic.getNPieces());
   if (this.canMoveL) pieces.push(this.logic.getLPieces()[this.playerNumber]);
   
-  var fieldSum = this.gui.fieldSize + this.gui.border;
-  
-  var piece, fields, field;
-  var fieldX, fieldY, j;
-  for (var i = 0; i < pieces.length; ++i) {
-    piece = pieces[i];
-    fields = piece.realise();
-    for (j = 0; j < fields.length; ++j) {
-      field = fields[j];
-      fieldX = field.x * fieldSum;
-      fieldY = field.y * fieldSum;
-      if (x >= fieldX && x < fieldX + fieldSum && 
-          y >= fieldY && y < fieldY + fieldSum) return piece;
-    }
-  }
-  return false;
+  return pieces;
 };
 
-LaGamePlayer.moveOutOfBoxPiece = function(piece) {
-  var fields = piece.realise()
-  var f, modX, modY;
-  for (var i = 0; i < fields.length; ++i) {
-    f = fields[i];
-    if (f.x < 0 && (modX == undefined || f.x < modX))
-      modX = -f.x
-    else if (f.x > 3 && (modX == undefined || f.x > modX))
-      modX = 3 - f.x;
-    if (f.y < 0 && (modY == undefined || f.y < modY))
-      modY = -f.y;
-    else if (f.y > 3 && (modY == undefined || f.y > modY))
-      modY = 3 - f.y;
+LaGamePlayer.prototype.coordOverOwnGamePiece = function(pos, replacingGameFields) {
+  var checkFields = function(fields) {
+    var field;
+    for (j = 0; j < fields.length; ++j) {
+      field = fields[j];
+      if (pos.x == field.x && pos.y == field.y) return true;
+    }
+    return false;
   }
-  return {x:modX ? modX : 0, y:modY ? modY : 0};
+  if (!replacingGameFields) {
+    var pieces = [];
+    if (this.canMoveNeutral) pieces = pieces.concat(this.logic.getNPieces());
+    if (this.canMoveL) pieces.push(this.logic.getLPieces()[this.playerNumber]);
+    var piece, check;
+    for (var i = 0; i < pieces.length; ++i) {
+      piece = pieces[i];
+      if (checkFields(realisePiece(piece))) return piece;
+    }
+    return false;
+  } else {
+    return checkFields(replacingGameFields);
+  }
 };
 
 LaGamePlayer.prototype.drawGameBoard = function() {
   alert("drawing")
   this.gui.drawGameBoard();
-  var fields = [];
-  if (this.movingPiece) {
-    if (this.movingPiece instanceof NPiece) {
-      var i = this.movingPiece.nid == 1 ? 0 : 1;
-      fields.push(this.logic.getNPieces()[i]);
-      fields = fields.concat(this.logic.getLPieces());
+  var mp = this.movingPiece;
+  var fields;
+  if (mp) {
+    if (mp.type == 'n') {
+      fields = [this.logic.getNPieces()[makeOpposite(mp.nid)]].
+        concat(this.logic.getLPieces());
+      this.gui.setNeutral(mp.x, mp.y, true);
     } else {
-      fields = fields.concat(this.logic.getNPieces());
-      var player = this.playerNumber == 1 ? 0 : 1;
-      fields.push(this.logic.getLPieces()[player]);
+      fields = [this.logic.getLPieces()[makeOpposite(this.playerNumber)]].
+        concat(this.logic.getNPieces());
+      this.gui.setLPiece(mp.x, mp.y, mp.rot, mp.inv, mp.player, true);
     }
+    
   } else {
     fields = this.logic.getNPieces().concat(this.logic.getLPieces());
   }
@@ -265,22 +424,7 @@ LaGamePlayer.prototype.drawGameBoard = function() {
       this.gui.setLPiece(field.pos.x, field.pos.y, field.rot, field.inv, field.player);
     }
   }
-  var mp = this.movingPiece;
-  if (mp) {
-    if (mp instanceof NPiece) {
-      alert("mp:"+field.pos.x+","+field.pos.y)
-      this.gui.setNeutral(mp.pos.x, mp.pos.y, true);
-    } else {
-      this.gui.setLPiece(mp.pos.x, mp.pos.y, mp.pos.rot, mp.inv, mp.player, true);
-    }
-    /* debugging code
-    var collisions = this.logic.isValidMove(mp);
-    if (collisions.error == "collision") {
-      for (var c1 = 0; c1 < collisions.fields.length; c1++) {
-        this.gui.setCollision(collisions.fields[c1].x,
-        collisions.fields[c1].y);
-      }
-    }
-    */
+  if (this.draggedFields != []) {
+    this.gui.setLFields(this.draggedFields, this.playerNumber);
   }
 };

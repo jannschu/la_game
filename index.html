@@ -29,20 +29,24 @@
   <script type="text/javascript" src="lagame.player.js"></script>
   <script type="text/javascript" src="lagame.logic.js"></script>
   <script type="text/javascript">
+    currentGame = null;
     function newGame() {
+      if (currentGame) currentGame.stopGame();
+      
       var playerLabel = document.getElementById('currentPlayer');
       var nextPlayer = document.getElementById('nextPlayer');
       var canvas = document.getElementById('laGameCanvas');
       
       var gui = new LaGameGUI(canvas, playerLabel, nextPlayer);
       var logic = new LaGameLogic(gui, LaGamePlayer, LaGamePlayer);
+      currentGame = logic;
       
       gui.setPlayerLabel('Spieler 1 beginnt', 0);
       gui.setCanFinishTurn(false);
       
-      document.getElementById('nextPlayer').addEventListener('click', function() {
+      document.getElementById('nextPlayer').onclick = function() {
         logic.finishTurn();
-      }, false)
+      }
       
       logic.initializeGame();
     }
@@ -80,9 +84,11 @@
     <input type="button" name="nextPlayer" value="Nächster Spieler" id="nextPlayer">
     <p id="gameInfo">
       <strong id="currentPlayer">Spieler 1 beginnt</strong>. Wähle die Steine per 
-      <code>Klick</code> aus, bewege sie mit den <code>Pfeiltasten</code> und platziere den Stein mit <code>Enter</code>.
-      Die <code>Leertaste</code> kannst du benutzen um Steine zu drehen.
-      Die Taste <code>B</code> dreht den Stein horizontal und <code>V</code> vertikal.
+      <code>Klick</code> aus. N-Steine kannst du wieder per Klick setzen und L-Steine
+      mit der Maus an der gewünschten Stelle ziehen. Solltest du dich
+      „verzogen“ haben, lass die Maus außerhalb deiner neuen Position los.
+      Wenn du den falschen N-Stein ausgesucht hast, 
+      kannst du deine Auswahl mit <code>ESC</code> ändern.
     </p>
   </fieldset>
   <p id="author">

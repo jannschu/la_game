@@ -59,6 +59,10 @@ function LaGameLogic(gui, playerA, playerB) {
     
 }
 
+LaGameLogic.prototype.stopGame = function() {
+  this.players[this.curPlayer].stopMoving();
+};
+
 LaGameLogic.prototype.getLPieces = function() {
   return this.field.lPieces;
 };
@@ -203,7 +207,7 @@ LaGameLogic.prototype.hasWon = function() {
     return true
   }
   
-  return false  
+  return false
 }
 
 /**

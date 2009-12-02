@@ -51,6 +51,15 @@ LaGameGUI.prototype.setCanFinishTurn = function(bool) {
   this.nextPlayerButton.disabled = !bool;
 };
 
+LaGameGUI.prototype.coordToPoint = function(cX, cY) {
+  var dim = this.border + this.fieldSize;
+  var x = Math.floor(cX / dim);
+  var y = Math.floor(cY / dim);
+  if (x == 4) x = 3;
+  if (y == 4) y = 3;
+  return {x:x, y:y};
+};
+
 /*****************************************************************************/
 /*                                DRAWING                                    */
 /*****************************************************************************/
@@ -140,10 +149,6 @@ LaGameGUI.prototype.setCollision = function(x, y, color) {
   ctx.fillRect(canX, canY + b , b, f);
   ctx.fillRect(canX + b + f, canY + b, b, f);
   ctx.fillRect(canX, canY + b + f, f + b * 2, b);
-}
-
-LaGameGUI.prototype.unsetCollision = function(x, y) {
-  this.setCollision(x, y, 'black');
 }
 
 /**
