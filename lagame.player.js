@@ -279,7 +279,7 @@ LaGamePlayer.prototype.getCondensedLPieceFor = function(fields) {
   piece.pos.x = x;
   piece.pos.y = y;
   if (shortTailEnd.x == piece.pos.x) { // rot 0 or 2
-    if (shortTailEnd.pos.y < piece.pos.y) {
+    if (shortTailEnd.y < piece.pos.y) {
       piece.rot = 0;
       piece.inv = longTailEnd.x < piece.pos.x;
     } else {
