@@ -105,6 +105,10 @@ LaGameGUI.prototype.setLPiece = function(lpiece, choosing) {
   var fields = lpiece.realise();
   var player = lpiece.player;
   
+  this.setLFields(fields, player, choosing);
+};
+
+LaGameGUI.prototype.setLFields = function(fields, player, choosing) {
   var ctx = this.canvas.getContext('2d');
   if (choosing) ctx.globalAlpha = 0.5;
   var borderColor = player == 2 ? 'black' : this.lColor[player];
@@ -122,6 +126,7 @@ LaGameGUI.prototype.setLPiece = function(lpiece, choosing) {
   }
   ctx.globalAlpha = 1;
 };
+
 /**
  * @param {LPiece} lpiece
  */

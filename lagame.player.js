@@ -127,7 +127,7 @@ LaGamePlayer.prototype.choosePiece = function(e) {
   var pos = this.mousePosToCanvasPosition(e);
   var piece = this.coordOverOwnGamePiece(pos);
   if (piece) {
-    this.movingPiece = this.copyPiece(piece);
+    this.movingPiece = piece.copy();
     this.gui.canvas.style.cursor = 'default';
     this.arrangeDragEvents();
     this.drawGameBoard();
@@ -151,13 +151,13 @@ LaGamePlayer.prototype.canvasPointer = function(c) {
 };
 
 LaGamePlayer.prototype.startDragging = function(e) {
-  if (!this.doingMove || !this.movingPiece || this.movingPiece.type == 'n')
+  if (!this.doingMove || !this.movingPiece || this.movingPiece instanceof NPiece)
     return;
   this.dragging = true;
 }
 
 LaGamePlayer.prototype.drag = function(e) {
-  if (this.movingPiece.type == 'n') return;
+  if (this.movingPiece instanceof NPiece) return;
   if (this.draggedFields.length >= 4) return;
   var pos = this.mousePosToCanvasPosition(e);
   var include = false;
@@ -178,12 +178,12 @@ LaGamePlayer.prototype.drag = function(e) {
 LaGamePlayer.prototype.stopDragging = function(e) {
   if (!this.doingMove || !this.movingPiece) return;
   
-  if (this.movingPiece.type == 'n') {
+  if (this.movingPiece instanceof NPiece) {
     var pos = this.mousePosToCanvasPosition(e);
-    this.movingPiece.x = pos.x;
-    this.movingPiece.y = pos.y;
+    this.movingPiece.pos.x = pos.x;
+    this.movingPiece.pos.y = pos.y;
     this.callEndCallback(this.movingPiece);
-  } else if (this.movingPiece.type == 'l') {
+  } else if (this.movingPiece instanceof LPiece) {
     var pos = this.mousePosToCanvasPosition(e);
     var mouseOverL = this.coordOverOwnGamePiece(pos, this.draggedFields);
     if (this.draggedFields.length == 4 && mouseOverL) {
@@ -199,7 +199,7 @@ LaGamePlayer.prototype.stopDragging = function(e) {
 
 LaGamePlayer.prototype.exitChoose = function() {
   if (this.dragging || !this.movingPiece) return;
-  if (this.movingPiece.type == 'n') this.retryMove(false);
+  if (this.movingPiece instanceof NPiece) this.retryMove(false);
 };
 
 LaGamePlayer.prototype.mouseMovedOut = function() {
@@ -210,14 +210,16 @@ LaGamePlayer.prototype.mouseMovedOut = function() {
 /*****************************************************************************/
 /*                                HELPER                                     */
 /*****************************************************************************/
-
+/**
+ * @param (V2d) test
+ */
 LaGamePlayer.prototype.fieldIsEmpty = function(test) {
   var pieces = [].concat(this.logic.getNPieces());
   pieces.push(this.logic.getLPieces()[makeOpposite(this.playerNumber)]);
   
   var j, fields;
   for (var i = 0; i < pieces.length; ++i) {
-    fields = realisePiece(pieces[i]);
+    fields = pieces[i].realise();
     for (j = 0; j < fields.length; ++j) {
       if (fields[j].x == test.x && fields[j].y == test.y) return false;
     }
@@ -225,6 +227,9 @@ LaGamePlayer.prototype.fieldIsEmpty = function(test) {
   return true;
 };
 
+/**
+ * @param (V2d) pos
+ */
 LaGamePlayer.prototype.isValidPosition = function(pos) {
   if (!this.fieldIsEmpty(pos)) return false;
   var fields = this.draggedFields;
@@ -235,26 +240,28 @@ LaGamePlayer.prototype.isValidPosition = function(pos) {
     return false;
   }
   if (this.draggedFields.length == 0) return true;
-  if (exists({x:pos.x+1, y:pos.y}) ||
-    exists({x:pos.x-1, y:pos.y}) ||
-    exists({x:pos.x, y:pos.y+1}) ||
-    exists({x:pos.x, y:pos.y-1})) return this.canBeValidLPiece([pos].concat(fields));
+  if (exists(new V2d(pos.x+1, pos.y)) ||
+    exists(new V2d(pos.x-1, pos.y)) ||
+    exists(new V2d(pos.x, pos.y+1)) ||
+    exists(new V2d(pos.x, pos.y-1)) ) return this.canBeValidLPiece([pos].concat(fields));
   else return false;
 };
-
+/**
+ * @param (V2d[]) fields
+ */
 LaGamePlayer.prototype.getCondensedLPieceFor = function(fields) {
   var a = fields[0];
   var b = fields[1];
   var c = fields[2];
   var d = fields[3];
-  var isDiagonal = function(a, b) {
+  var isDiagonal = function(a, b) { // a, b instanceof V2d
     return Math.abs(a.x - b.x) == 1 && Math.abs(a.y - b.y) == 1;
   }
   var isPair = function(a, b) {
     return (a.x == b.x && Math.abs(a.y - b.y) == 1) ||
       (a.y == b.y && Math.abs(a.x - b.x) == 1)
   }
-  var piece = {player: this.playerNumber, type: 'l'};
+  var piece = new LPiece(new V2d(), null, null, this.playerNumber);
   var perms = [[a, b, c, d], [a, c, b, d], [a, d, b, c], [b, c, d, a], [b, d, a, c], [c, d, a, b]];
   var x, y, longTailEnd, shortTailEnd, nr, p;
   for (var i = 0; i < 6; ++i) {
@@ -269,28 +276,31 @@ LaGamePlayer.prototype.getCondensedLPieceFor = function(fields) {
     }
   }
   if (x == undefined) return false;
-  piece.x = x;
-  piece.y = y;
-  if (shortTailEnd.x == piece.x) { // rot 0 or 2
-    if (shortTailEnd.y < piece.y) {
+  piece.pos.x = x;
+  piece.pos.y = y;
+  if (shortTailEnd.x == piece.pos.x) { // rot 0 or 2
+    if (shortTailEnd.pos.y < piece.pos.y) {
       piece.rot = 0;
-      piece.inv = longTailEnd.x < piece.x;
+      piece.inv = longTailEnd.x < piece.pos.x;
     } else {
       piece.rot = 2;
-      piece.inv = longTailEnd.x > piece.x;
+      piece.inv = longTailEnd.x > piece.pos.x;
     }
   } else { // rot 1 or 3
-    if (longTailEnd.y < piece.y) {
+    if (longTailEnd.y < piece.pos.y) {
       piece.rot = 1;
-      piece.inv = shortTailEnd.x > piece.x;
+      piece.inv = shortTailEnd.x > piece.pos.x;
     } else {
       piece.rot = 3;
-      piece.inv = shortTailEnd.x < piece.x;
+      piece.inv = shortTailEnd.x < piece.pos.x;
     }
   }
   return piece;
 };
 
+/**
+ * @param (V2d[]) fields
+ */
 LaGamePlayer.prototype.canBeValidLPiece = function(fields) {
   if (fields.length < 2) return true;
   if (fields.length > 4) return false;
@@ -333,7 +343,8 @@ LaGamePlayer.prototype.canBeValidLPiece = function(fields) {
   var notOldLPiece = function(fields) {
     var cond = player.getCondensedLPieceFor(fields);
     var old = player.logic.getLPieces()[player.playerNumber];
-    return cond.x != old.x || cond.y != old.y || cond.rot != old.rot || cond.inv != old.inv
+    return cond.pos.x != old.pos.x || cond.pos.y != old.pos.y || 
+      cond.rot != old.rot || cond.inv != old.inv;
   }
   switch (fields.length) {
     case 2: return isPair(fields[0], fields[1]);
@@ -347,13 +358,6 @@ LaGamePlayer.prototype.callEndCallback = function(newPiece) {
   var callback = this.endMoveCallback;
   if (callback)
     window.setTimeout(function() { callback(newPiece) }, 0);
-};
-
-LaGamePlayer.prototype.copyPiece = function(piece) {
-  var newPiece = {};
-  for (p in piece)
-    newPiece[p] = piece[p];
-  return newPiece;
 };
 
 LaGamePlayer.prototype.mousePosToCanvasPosition = function(e) {
@@ -371,7 +375,7 @@ LaGamePlayer.prototype.getNonEmptyPieces = function() {
 };
 
 LaGamePlayer.prototype.coordOverOwnGamePiece = function(pos, replacingGameFields) {
-  var checkFields = function(fields) {
+  var checkFields = function(fields) { // fields V2d[]
     var field;
     for (j = 0; j < fields.length; ++j) {
       field = fields[j];
@@ -386,7 +390,7 @@ LaGamePlayer.prototype.coordOverOwnGamePiece = function(pos, replacingGameFields
     var piece, check;
     for (var i = 0; i < pieces.length; ++i) {
       piece = pieces[i];
-      if (checkFields(realisePiece(piece))) return piece;
+      if (checkFields(piece.realise())) return piece;
     }
     return false;
   } else {
@@ -395,33 +399,31 @@ LaGamePlayer.prototype.coordOverOwnGamePiece = function(pos, replacingGameFields
 };
 
 LaGamePlayer.prototype.drawGameBoard = function() {
-  alert("drawing")
   this.gui.drawGameBoard();
   var mp = this.movingPiece;
-  var fields;
+  var pieces;
   if (mp) {
-    if (mp.type == 'n') {
-      fields = [this.logic.getNPieces()[makeOpposite(mp.nid)]].
+    if (mp instanceof NPiece) {
+      pieces = [this.logic.getNPieces()[makeOpposite(mp.nid)]].
         concat(this.logic.getLPieces());
-      this.gui.setNeutral(mp.x, mp.y, true);
+      this.gui.setNeutral(mp, true);
     } else {
-      fields = [this.logic.getLPieces()[makeOpposite(this.playerNumber)]].
+      pieces = [this.logic.getLPieces()[makeOpposite(this.playerNumber)]].
         concat(this.logic.getNPieces());
-      this.gui.setLPiece(mp.x, mp.y, mp.rot, mp.inv, mp.player, true);
+      this.gui.setLPiece(mp, true);
     }
     
   } else {
-    fields = this.logic.getNPieces().concat(this.logic.getLPieces());
+    pieces = this.logic.getNPieces().concat(this.logic.getLPieces());
   }
-  var field;
-  for (var p = 0; p < fields.length; ++p) {
-    field = fields[p];
-    if (field instanceof NPiece) {
-      alert("f:"+field.pos.x+","+field.pos.y)
-      this.gui.setNeutral(field.pos.x, field.pos.y);
+  var piece;
+  for (var p = 0; p < pieces.length; ++p) {
+    piece = pieces[p];
+    if (piece instanceof NPiece) {
+      this.gui.setNeutral(piece);
     }
     else {
-      this.gui.setLPiece(field.pos.x, field.pos.y, field.rot, field.inv, field.player);
+      this.gui.setLPiece(piece);
     }
   }
   if (this.draggedFields != []) {

@@ -75,13 +75,11 @@ LaGameLogic.prototype.initializeGame = function() {
   // TODO place start pieces randomly
   this.gui.drawGameBoard();
   var neutrals = this.getNPieces();
-  this.gui.setNeutral(neutrals[0].pos.x, neutrals[0].pos.y);
-  this.gui.setNeutral(neutrals[1].pos.x, neutrals[1].pos.y);
+  this.gui.setNeutral(neutrals[0]);
+  this.gui.setNeutral(neutrals[1]);
   var l = this.getLPieces();
-  var l0 = l[0];
-  this.gui.setLPiece(l0.pos.x, l0.pos.y, l0.rot, l0.inv, 0);
-  var l1 = l[1];
-  this.gui.setLPiece(l1.pos.x, l1.pos.y, l1.rot, l1.inv, 1);
+  this.gui.setLPiece(l[0]);
+  this.gui.setLPiece(l[1]);
   
   /* Request move from player */
   this.registerCallback();
@@ -298,7 +296,7 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
     /* We'll need that */
     var oppPlayer = makeOpposite(this.curPlayer)
     
-    candidates = candidates.concat(this.lPieces[oppPlayer].realise())
+    candidates = candidates.concat(this.field.lPieces[oppPlayer].realise())
     candidates.push(this.field.nPieces[0].realise())
     candidates.push(this.field.nPieces[1].realise())
     
