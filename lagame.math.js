@@ -39,27 +39,14 @@ V2d.prototype.sub = function(rhs) {
 
 /* Field add */
 V2d.prototype.fadd = function (rhs) {
-  var tempX = this.x + rhs.x
-  var modRem = tempX % 4
-  if (tempX > 3) {
-  this.x = 0
-  var incrX = modRem
-  }
-  else {
-  var incrX = rhs.x
-  }
-  var incrY = (tempX-modRem)/4
-  
-  this.x += incrX
-  this.y += rhs.y + incrY
-  
+  this.x = Math.abs(rhs.x + this.x) % 4;
+  this.y = Math.abs(rhs.y + this.y) % 4;
   return this
 }
 
 /* Field sub */
 V2d.prototype.fsub = function (rhs) {
   this.fadd(new V2d(-rhs.x, -rhs.y))
-  
   return this
 }
 
