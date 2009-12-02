@@ -39,8 +39,9 @@ V2d.prototype.sub = function(rhs) {
 
 /* Field add */
 V2d.prototype.fadd = function (rhs) {
-  this.x = Math.abs(rhs.x + this.x) % 4;
-  this.y = Math.abs(rhs.y + this.y) % 4;
+  var xSum = Math.abs(rhs.x + this.x);
+  this.x = xSum % 4;
+  this.y = Math.abs(rhs.y + this.y + Math.floor(xSum / 4)) % 4;
   return this
 }
 
