@@ -67,3 +67,22 @@ V2d.prototype.isOob = function () {
   return false
 }
 
+V2d.prototype.rot = function () {
+  var tempX = this.x
+  this.x = this.y
+  this.y = tempX
+  
+  return this
+}
+
+V2d.prototype.condRot = function (rot) {
+
+  if (rot == null || rot == 0) {
+    return this
+  }
+  else {
+    return this.rot()
+  }
+
+}
+

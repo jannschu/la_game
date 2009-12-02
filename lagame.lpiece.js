@@ -77,9 +77,30 @@ LPiece.prototype.realise = function() {
 
 }
 
-LPiece.prototype.isSame = function(rhs) {
+LPiece.prototype.realiseRot = function() {
+  /* Realise the rot you're saying. Get it? Haha. Incredibly funny. */
+  fields = this.realise()
+  tempfields = fields.copy()
+  for (var c1 = 0; c1 < fields.length; c1++) {
+    fields.x = tempfields.y
+    fields.y = tempfields.x
+  }
+  
+  return fields
+  
+}
 
-  var lhsFields = this.realise()
+LPiece.prototype.isSame = function(rhs, rot) {
+
+  var lhsFields
+  
+  if (rot == null || rot == 0) {
+    lhsFields = this.realise()
+  }
+  else {
+    lhsFields = this.realiseRot()
+  }
+  
   var rhsFields = rhs
   
   var isRepresented = false

@@ -188,6 +188,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
   var curBar = new V2d(0,0)
   
   for (var rot = 0; rot < 2; rot++) {
+    curPos = new V2d(0,0)
     /* If it shalt be rotated, switch x and y positions */
     if (rot == 1) {
       var tempRot = field.copy();
@@ -196,6 +197,13 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
           field[c2][c1] = tempRot[c1][c2]
         }
       }
+      var outp = ""
+      for (var d1 = 0; d1 < 4; d1++) {
+        for (var d2 = 0; d2 < 4; d2++) {
+          outp += " " + field[d1][d2]
+        }
+        outp += "\n"
+      } console.log(outp)
     } /* End of rotation code */
     
     /* Actual shite starts here */
@@ -217,9 +225,9 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
      
       for (var c1 = 0; c1 < lCands.length; c1++) {
         console.log("checkingp: " + lCands[c1].y + "," + lCands[c1].x)
-        if (!(this.lPieces[excludeLid].isSame(lCands[c1]))) {
+        if (!(this.lPieces[excludeLid].isSame(curBar.concat(lCands[c1]), rot))) {
           console.log("p: bs:" + curBar[0].y + "," + curBar[0].x + " st:" + lCands[c1].y + "," + lCands[c1].x)
-          foundLs.push({stub:lCands[c1],barStart:curBar[0]})
+          foundLs.push({stub:lCands[c1].condRot(rot),barStart:curBar[0].condRot(rot)})
           if (foundLs.length == stopAfter) {
             console.log("fl1:" + foundLs.length)
             return foundLs
@@ -240,8 +248,7 @@ LaGameField.prototype.findHBar = function(occField, startAt) {
 
   var startX = startAt.x
   var startY = startAt.y
-  
-  console.log("start:" + startY + "," + startX)  
+    
   var empty = new Array()
   
   /* Vertical loop */
@@ -254,7 +261,6 @@ LaGameField.prototype.findHBar = function(occField, startAt) {
     for (var hC = startX; hC < 4; hC++) {
     
       if (occField[vC][hC] == 0) {
-        console.log("pushing:" + vC + "," + hC)
         empty.push(new V2d(hC,vC))
       }
       else {
@@ -297,7 +303,6 @@ LaGameField.prototype.checkBarLs = function(occField, barStart, stopAfter) {
     }
     
     if (occField[curPos.y][curPos.x] == 0) {
-      console.log("stub:" + curPos.y + "," + curPos.x + " : " + c1)
       matchLStubs.push(curPos)
       if (matchLStubs.length == stopAfter) {
         break
