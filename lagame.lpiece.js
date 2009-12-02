@@ -19,6 +19,14 @@ function LPiece(pos, rot, inv, player) {
 
 }
 
+LPiece.prototype.copy = function() {
+  var pos = this.pos.copy();
+  var copy = new LPiece(pos, this.rot, this.inv, this.player);
+  copy.cachedFields = this.cachedFields.copy();
+  copy.cachedVals = {pos: pos, rot: this.rot, inv: this.inv};
+  return copy;
+};
+
 LPiece.rVals = [
   [ new V2d(1,0), new V2d(2,0), new V2d(0,-1) ], // rot 0
   [ new V2d(-1,0), new V2d(0,-1), new V2d(0,-2) ], // rot 1

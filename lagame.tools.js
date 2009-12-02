@@ -16,22 +16,33 @@
  * along with La Game.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
-Object.prototype.copy = function() {
-  if (typeof this == 'object') {
-    var copy = {};
-    copy.__proto__ = this.__proto__;
-    for (var p in this)
-      if (this.hasOwnProperty(p)) copy[p] = 
-        typeof this[p] == 'object' ? this[p].copy() : this[p];
-    return copy;
-  } else return this;
-}
+Array.prototype.copy = function() {
+  var copyArray = [];
+  var e;
+  for (var i = 0; i < this.length; ++i) {
+    e = this[i];
+    if (e !== undefined && e !== null && e !== false && e !== true) {
+      // if (!this[i].copy) console.log(this[i])
+      copyArray[i] = e.copy();
+    } else {
+      copyArray[i] = e;
+    }
+  }
+  return copyArray;
+};
+
+var refCopy = function() { return this };
+
+Number.prototype.copy = refCopy;
+String.prototype.copy = refCopy;
+Boolean.prototype.copy = refCopy;
 
 /* 
  * Fields for all possible L-Piece positions
  * @see LaGameGUI#setLPiece
  * Reference point is always the edge of the L-Piece
  */
+
 LPArrs = [
   [{ x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y:-1 }], // 0. pos
   [{ x:-1, y: 0 }, { x: 0, y:-1 }, { x: 0, y:-2 }], // 1. pos

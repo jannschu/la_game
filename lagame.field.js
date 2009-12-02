@@ -21,6 +21,82 @@ function LaGameField() {
 
 }
 
+LaGameField.prototype.copy = function() {
+  var copy = new LaGameField();
+  copy.lPieces = this.lPieces.copy();
+  copy.nPieces = this.nPieces.copy();
+  copy.cachedOcc = this.cachedOcc.copy();
+  return copy;
+};
+
+LaGameField.prototype.hashCode = function() {
+  // first make player one's l-piece have a vertical long tail
+  var hashField = this.copy();
+  var refLPiece = hashField.lPieces[0];
+  if (refLPiece.rot == 0 || refLPiece.rot == 2) hashField.rotateField();
+  // now make the long tail show downwards
+  if (refLPiece.rot == 1) hashField.inverseFieldVertically();
+  // now make shure it is not horizontally inversed
+  if (refLPiece.inv) hashField.inverseFieldHorizontally();
+  if (refLPiece.inv != false || refLPiece.rot != 3) {
+    console.error("it's not right")
+    console.log(refLPiece)
+  }
+  var lPieceHash = function(piece) {
+    return "" + piece.pos.x + piece.pos.y + piece.rot + piece.inv ? "1" : "0" + piece.player
+  };
+  var nPieceHash = function(n) {
+    return "" + n.pos.x + n.pos.y;
+  };
+  var code = lPieceHash(hashField.lPieces[0]) + lPieceHash(hashField.lPieces[1]) +
+    nPieceHash(hashField.nPieces[0]) + nPieceHash(hashField.nPieces[1]);
+  return Number(code).toString(36);
+};
+
+LaGameField.prototype.inverseFieldHorizontally = function() {
+  var n = this.nPieces;
+  n[0].pos.x = 3 - n[0].pos.x;
+  n[1].pos.x = 3 - n[1].pos.x;
+  var l = this.lPieces;
+  l[0].pos.x = 3 - l[0].pos.x;
+  l[1].pos.x = 3 - l[1].pos.x;
+  l[0].inv = !l[0].inv;
+  l[1].inv = !l[1].inv;
+};
+
+LaGameField.prototype.inverseFieldVertically = function() {
+  var n = this.nPieces;
+  n[0].pos.y = 3 - n[0].pos.y;
+  n[1].pos.y = 3 - n[1].pos.y;
+  var l = this.lPieces;
+  l[0].pos.y = 3 - l[0].pos.y;
+  l[1].pos.y = 3 - l[1].pos.y;
+  if ((l[0].rot += 2) >= 4) l[0].rot -= 4
+  if ((l[1].rot += 2) >= 4) l[1].rot -= 4
+  l[0].inv = !l[0].inv;
+  l[1].inv = !l[1].inv;
+};
+
+LaGameField.prototype.rotateField = function() {
+  var rotateNPiece = function(n) {
+    var x0 = n.pos.x;
+    n.pos.x = n.pos.y;
+    n.pos.y = 3 - x0;
+    return n;
+  };
+  var rotateLPiece = function(l) {
+    var x0 = l.pos.x;
+    l.pos.x = l.pos.y;
+    l.pos.y = 3 - x0;
+    if (++l.rot == 4) l.rot = 0;
+    return l;
+  };
+  this.nPieces[0] = rotateNPiece(this.nPieces[0]);
+  this.nPieces[1] = rotateNPiece(this.nPieces[1]);
+  this.lPieces[0] = rotateLPiece(this.lPieces[0]);
+  this.lPieces[1] = rotateLPiece(this.lPieces[1]);
+};
+
 /* TODO: cache those as well */
 /* TODO: maybe just delta-modification instead of always re-initialization */
 /**

@@ -6,6 +6,8 @@ function V2d(x, y) {
 
 }
 
+V2d.prototype.copy = function() { return new V2d(this.x, this.y) };
+
 
 V2d.prototype.add = function(rhs) {
 

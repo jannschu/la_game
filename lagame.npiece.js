@@ -1,10 +1,13 @@
-
 function NPiece(pos, nid) {
 
   this.pos = pos
   this.nid = nid
 
 }
+
+NPiece.prototype.copy = function() {
+  return new NPiece(this.pos.copy(), this.nid)
+};
 
 NPiece.prototype.realise = function() {
 
