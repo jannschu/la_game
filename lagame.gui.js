@@ -57,12 +57,13 @@ LaGameGUI.prototype.setCanFinishTurn = function(bool) {
 
 /**
  * Places a neutral game piece
- * @param {Number} x Horizontal position from top left
- * @param {Number} y Vertical position from top left
+ * @param {NPiece} npiece the NPiece to draw
  * @param {Boolean} choosing true if it should print the L-Piece in the 'user 
  * chooses a positon' mode (maybe transparent)
  */
-LaGameGUI.prototype.setNeutral = function(x, y, choosing) {
+LaGameGUI.prototype.setNeutral = function(npiece, choosing) {
+  var x = npiece.pos.x;
+  var y = npiece.pos.y;
   var canX = (this.border + this.fieldSize) * x + this.fieldSize / 2 + this.border;
   var canY = (this.border + this.fieldSize) * y + this.fieldSize / 2 + this.border;
   var ctx = this.canvas.getContext('2d');
@@ -73,28 +74,27 @@ LaGameGUI.prototype.setNeutral = function(x, y, choosing) {
 };
 
 /**
- * @param {Number} x Horizontal position from top left
- * @param {Number} y Vertical position from top left
+ * @param {NPiece} npiece
  */
-LaGameGUI.prototype.unsetNeutral = function(x, y) {
-  var canX = (this.border + this.fieldSize) * x + this.border;
-  var canY = (this.border + this.fieldSize) * y + this.border;
+LaGameGUI.prototype.unsetNeutral = function(npiece) {
+  var canX = (this.border + this.fieldSize) * npiece.pos.x + this.border;
+  var canY = (this.border + this.fieldSize) * npiece.pos.y + this.border;
   var ctx = this.canvas.getContext('2d');
   ctx.fillStyle = 'white';
   ctx.fillRect(canX, canY, this.fieldSize, this.fieldSize);
 };
 
 /**
- * @see #setNeutral
- * @param {Number} rotation Can be 0, 1, 2, 3
- * Starting by 0 and then rotated anti-clockwise:
+ * @param {LPiece} lpiece
+ * The rot property of lpiece starting by 0 and then rotated anti-clockwise:
  * 0: #    1:  #  2: ###  3: ##
  *    ###      #       #     #
  *            ##             #
- * @param {Boolean} inversed true if the above should be flipped horizontal
+ * @param {Boolean} choosing true if the piece is selected by the user
  */
-LaGameGUI.prototype.setLPiece = function(x, y, rotation, inversed, player, choosing) {
-  var fields = realisePiece({x:x, y:y, rot:rotation, inv:inversed, type:"l"}); /* FIXME */
+LaGameGUI.prototype.setLPiece = function(lpiece, choosing) {
+  var fields = lpiece.realise();
+  var player = lpiece.player;
   
   var ctx = this.canvas.getContext('2d');
   if (choosing) ctx.globalAlpha = 0.5;
@@ -114,11 +114,12 @@ LaGameGUI.prototype.setLPiece = function(x, y, rotation, inversed, player, choos
   ctx.globalAlpha = 1;
 };
 /**
- * @see #setLPiece
- * @see #unsetNeutral
+ * @param {LPiece} lpiece
  */
-LaGameGUI.prototype.unsetLPiece = function(x, y, rotation, inversed) {
-  this.setLPiece(x, y, rotation, inversed, 2);
+LaGameGUI.prototype.unsetLPiece = function(lpiece) {
+  var copy = lpiece.copy()
+  copy.player = 2;
+  this.setLPiece(copy);
 };
 
 /**
