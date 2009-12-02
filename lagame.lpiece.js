@@ -82,11 +82,11 @@ LPiece.prototype.realiseRot = function() {
   fields = this.realise()
   tempfields = fields.copy()
   for (var c1 = 0; c1 < fields.length; c1++) {
-    fields.x = tempfields.y
-    fields.y = tempfields.x
+    tempfields[c1].x = fields[c1].y
+    tempfields[c1].y = fields[c1].x
   }
   
-  return fields
+  return tempfields
   
 }
 
@@ -98,6 +98,7 @@ LPiece.prototype.isSame = function(rhs, rot) {
     lhsFields = this.realise()
   }
   else {
+    console.log("realiserot")
     lhsFields = this.realiseRot()
   }
   

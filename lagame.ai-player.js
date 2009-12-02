@@ -15,3 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with La Game.  If not, see <http://www.gnu.org/licenses/>. 
  */
+
+/*
+ * THE PLAN:
+
+1.) get all possible L and N positions
+2.) map those to L pieces
+3.) create hash and store it somewhere
+4.) compare this hash to any hashes so far; if it's equal, stop the current
+    branch of execution
+5.) if the situation means win, return "win"
+6.) if the situation means fail, return "fail"
+
+ * :NALP EHT
+ */
