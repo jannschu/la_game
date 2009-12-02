@@ -62,11 +62,14 @@ LaGameField.prototype.hashCode = function() {
   var lPieceHash = function(piece) {
     return "" + piece.pos.x + piece.pos.y + piece.rot + piece.inv ? "1" : "0" + piece.player
   };
-  var nPieceHash = function(n) {
-    return "" + n.pos.x + n.pos.y;
+  var nPieceHash = function(a, b) {
+    var a = "" + a.pos.x + a.pos.y;
+    var b = "" + b.pos.x + b.pos.y;
+    if (Number(a) < Number(b)) return a + b;
+    else return b + a;
   };
   var code = lPieceHash(hashField.lPieces[0]) + lPieceHash(hashField.lPieces[1]) +
-    nPieceHash(hashField.nPieces[0]) + nPieceHash(hashField.nPieces[1]);
+    nPieceHash(hashField.nPieces[0], hashField.nPieces[1]);
   return Number(code).toString(36);
 };
 
