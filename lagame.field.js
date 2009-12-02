@@ -48,11 +48,16 @@ LaGameField.prototype.getOcc = function(candidates) {
   
   for (var c1 = 0; c1 < allPieceFields.length; c1++) {
   
-    //field[allPieceFields[c1].x][allPieceFields[c1].y] = 1
-    field[allPieceFields[c1].x] = 1
+    field[allPieceFields[c1].y][allPieceFields[c1].x] = 1
   
   }
-  
+          var outp = "\n"
+      for (var d1 = 0; d1 < 4; d1++) {
+        outp += "\n"
+        for (var d2 = 0; d2 < 4; d2++) {
+          outp += field[d1][d2]
+        }
+      }      console.log(outp)
   return field
 
 }
@@ -68,7 +73,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
   candidates = candidates.concat(this.nPieces)
   
   var field = this.getOcc(candidates)
-  
+
   /* TODO: sth with rotation, checking for stopAfter == 0, ... dunno */
   
   /* TODO: improve efficiency by using an alternate method regarding
@@ -94,7 +99,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
   for (var rot = 0; rot < 2; rot++) {
     /* If it shalt be rotated, switch x and y positions */
     if (rot == 1) {
-      var tempRot = field.copy;
+      var tempRot = field.copy();
       for (var c1 = 0; c1 < 4; c1++) {
         for (var c2 = 0; c2 < 4; c2++) {
           field[c2][c1] = tempRot[c1][c2]
@@ -104,9 +109,15 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
     
     /* Actual shite starts here */
     /* There can't be a bar anymore if it's at 4|2 */
-    while (curPos.y < 4 && curPos.x < 3) {
+    var bFound = 0
+    while (curPos.y < 4 || curPos.x < 3) {
       curBar = this.findHBar(field, curPos)
+      /* 0 on "no bars left" */
+      if (curBar == 0) {
+        break
+      }
       /* FIXME: barStart only sux, see below, fix! */
+      bFound++
       
       lCands = this.checkBarLs(field, curBar[0], 5) /* 4! */
       
@@ -114,6 +125,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
         if (!this.lPieces[excludeLid].isSame(lCands[c1])) {
           foundLs.push({stub:lCands[c1],barStart:curBar[0]})
           if (foundLs.length == stopAfter) {
+            console.log("fl1:" + foundLs.length)
             return foundLs
           }
         }
@@ -121,7 +133,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
       
       curPos.fadd(incr)
     }
-    
+    console.log("bfound:" + bFound)
   }
   
   return foundLs
@@ -130,6 +142,10 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
 
 LaGameField.prototype.findHBar = function(occField, startAt) {
 
+  var startX = startAt.x
+  var startY = startAt.y
+  
+  console.log("start:" + startY + "," + startX)  
   var empty = new Array()
   
   /* Vertical loop */
@@ -139,10 +155,11 @@ LaGameField.prototype.findHBar = function(occField, startAt) {
     empty = new Array()
     
     /* Horizontal loop */
-    for (var hC = startAt.x; hC < 4; hC++) {
+    for (var hC = startX; hC < 4; hC++) {
     
       if (occField[vC][hC] == 0) {
-        empty.push(new V2d(vC,hC))
+        console.log("pushing:" + vC + "," + hC)
+        empty.push(new V2d(hC,vC))
       }
       else {
         empty = new Array()
@@ -151,8 +168,12 @@ LaGameField.prototype.findHBar = function(occField, startAt) {
       if (empty.length == 3) {
         return empty /* FIXME FIXED'AH! */
       }
+      
     
     }
+    
+    /* Counts for the first time only; afterwards, continue in next line: 0 */
+    startX = 0
     
   }
   

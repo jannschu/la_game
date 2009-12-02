@@ -29,11 +29,17 @@ V2d.prototype.sub = function(rhs) {
 V2d.prototype.fadd = function (rhs) {
   var tempX = this.x + rhs.x
   var modRem = tempX % 4
+  if (tempX > 3) {
+  this.x = 0
   var incrX = modRem
+  }
+  else {
+  var incrX = rhs.x
+  }
   var incrY = (tempX-modRem)/4
   
-  this.x += this.x + incrX
-  this.y += this.y + rhs.y + incrY
+  this.x += incrX
+  this.y += rhs.y + incrY
   
   return this
 }

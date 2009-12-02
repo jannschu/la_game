@@ -30,14 +30,63 @@
   <script type="text/javascript" src="lagame.logic.js"></script>
   <script type="text/javascript">
     window.onload = function() {
+    //return
+    mVect = new V2d(0,0)
+    inc = new V2d(1,0)
+    
+    var outp1 = "vect:\n"
+    
+    console.log(outp1)
+    
+    /*while (mVect.x != 3 || mVect.y != 3) {
+      console.log("i:" + mVect.y + "," + mVect.x + "\n")
+      mVect.fadd(inc)
+    }
+    
+    console.log("i:" + mVect.y + "," + mVect.x + "\n")
+    */
+
     mField = new LaGameField()
+    
+    var hbars = "go"
+    var hbarsnum = 0
+    var startAt = new V2d(0,0)
+    
+    while (hbars != 0) {
+    
+    hbars = mField.findHBar(
+      [
+      [ 0,0,0,0 ],
+      [ 0,0,0,0 ],
+      [ 1,1,1,1 ],
+      [ 1,1,1,1 ]
+      ],
+      startAt)
+    startAt.fadd(inc)
+    if (hbars == 0) {
+      console.log("0")
+    }
+    else {
+      console.log("hb:" + hbars[0].y + "," + hbars[0].x)
+      startAt.y = hbars[1].y
+      startAt.x = hbars[1].x
+      hbarsnum++
+    }
+    
+    }
+    
+    console.log("hbarsnum:" + hbarsnum)
+    
+    return
+    
     emptyLs = mField.getEmptyLs(0, 100)
-    var outp = "\n"
+    var outp = "el:" + emptyLs.length
     for (var c1 = 0; c1 < emptyLs.length; c1++) {
       outp += ("bar:"+emptyLs[c1].barStart.y+","+emptyLs[c1].barStart.x+"\nstub:"+emptyLs[c1].stub.y+","+emptyLs[c1].barStart.x+"\n")
     }
-    alert(outp)
+    console.log("outp:" + outp)
     }
+
     /*function newGame() {
       var playerLabel = document.getElementById('currentPlayer');
       var nextPlayer = document.getElementById('nextPlayer');
