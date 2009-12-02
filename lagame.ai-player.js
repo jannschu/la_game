@@ -19,6 +19,7 @@
 /*
  * THE PLAN:
 
+0.) increase count variable
 1.) get all possible L and N positions
 2.) map those to L pieces
 3.) create hash and store it somewhere

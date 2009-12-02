@@ -153,7 +153,7 @@ LaGameField.prototype.getOcc = function(candidates) {
         for (var d2 = 0; d2 < 4; d2++) {
           outp += field[d1][d2]
         }
-      }      console.log(outp)
+      }      //console.log(outp)
   return field
 
 }
@@ -203,7 +203,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
           outp += " " + field[d1][d2]
         }
         outp += "\n"
-      } console.log(outp)
+      } //console.log(outp)
     } /* End of rotation code */
     
     /* Actual shite starts here */
@@ -221,15 +221,15 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
       
       lCands = this.checkBarLs(field, curBar[0], 5) /* 4! */
       
-      console.log("lclen:" + lCands.length)
+      //console.log("lclen:" + lCands.length)
      
       for (var c1 = 0; c1 < lCands.length; c1++) {
-        console.log("checkingp: " + lCands[c1].y + "," + lCands[c1].x)
+        //console.log("checkingp: " + lCands[c1].y + "," + lCands[c1].x)
         if (!(this.lPieces[excludeLid].isSame(curBar.concat(lCands[c1]), rot))) {
-          console.log("p: bs:" + curBar[0].y + "," + curBar[0].x + " st:" + lCands[c1].y + "," + lCands[c1].x)
+          //console.log("p: bs:" + curBar[0].y + "," + curBar[0].x + " st:" + lCands[c1].y + "," + lCands[c1].x)
           foundLs.push({stub:lCands[c1].condRot(rot),barStart:curBar[0].condRot(rot)})
           if (foundLs.length == stopAfter) {
-            console.log("fl1:" + foundLs.length)
+            //console.log("fl1:" + foundLs.length)
             return foundLs
           }
         }

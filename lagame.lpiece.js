@@ -98,7 +98,7 @@ LPiece.prototype.isSame = function(rhs, rot) {
     lhsFields = this.realise()
   }
   else {
-    console.log("realiserot")
+    //console.log("realiserot")
     lhsFields = this.realiseRot()
   }
   
