@@ -1,3 +1,20 @@
+/*
+ * This file is part of La Game.
+ * Copyright 2009 Shahriar Heidrich and Jannik Schürg
+ * 
+ * La Game is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * La Game is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with La Game.  If not, see <http://www.gnu.org/licenses/>. 
+ */
 
 /**
  * Represents an L piece in the game
@@ -18,6 +35,14 @@ function LPiece(pos, rot, inv, player) {
   this.cachedVals = {pos: pos, rot: rot, inv: inv}
 
 }
+
+LPiece.prototype.copy = function() {
+  var pos = this.pos.copy();
+  var copy = new LPiece(pos, this.rot, this.inv, this.player);
+  copy.cachedFields = this.cachedFields.copy();
+  copy.cachedVals = {pos: pos, rot: this.rot, inv: this.inv};
+  return copy;
+};
 
 LPiece.rVals = [
   [ new V2d(1,0), new V2d(2,0), new V2d(0,-1) ], // rot 0
