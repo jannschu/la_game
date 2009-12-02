@@ -65,3 +65,10 @@ a:visited {
    font-size: 1.2em;
    color: #820013;
 }
+
+#gplLogo {
+   display: block;
+   position: absolute;
+   bottom: 5px;
+   right: 5px;
+}
