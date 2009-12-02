@@ -38,10 +38,10 @@ LaGameField.prototype.hashCode = function() {
   if (refLPiece.rot == 1) hashField.inverseFieldVertically();
   // now make shure it is not horizontally inversed
   if (refLPiece.inv) hashField.inverseFieldHorizontally();
-  if (refLPiece.inv != false || refLPiece.rot != 3) {
-    console.error("it's not right")
-    console.log(refLPiece)
-  }
+  // if (refLPiece.inv != false || refLPiece.rot != 3) {
+  //   console.error("it's not right")
+  //   console.log(refLPiece)
+  // }
   var lPieceHash = function(piece) {
     return "" + piece.pos.x + piece.pos.y + piece.rot + piece.inv ? "1" : "0" + piece.player
   };
