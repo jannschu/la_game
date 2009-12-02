@@ -158,11 +158,6 @@ LaGameField.prototype.getOcc = function(candidates) {
 
 }
 
-LaGameField.lStubs = [
-  new V2d(0,-1), new V2d(0,1),
-  new V2d(2,-1), new V2d(2,1)
-]
-
 LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
 
   var candidates = new Array( this.lPieces[makeOpposite(excludeLid)] )
@@ -212,13 +207,18 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
       if (curBar == 0) {
         break
       }
-      /* FIXME: barStart only sux, see below, fix! */
-      bFound++
+      
+      curPos.x = curBar[0].x
+      curPos.y = curBar[0].y
       
       lCands = this.checkBarLs(field, curBar[0], 5) /* 4! */
       
-      for (var c1 = 0; c1 < lCands.length; lCands++) {
-        if (!this.lPieces[excludeLid].isSame(lCands[c1])) {
+      console.log("lclen:" + lCands.length)
+     
+      for (var c1 = 0; c1 < lCands.length; c1++) {
+        console.log("checkingp: " + lCands[c1].y + "," + lCands[c1].x)
+        if (!(this.lPieces[excludeLid].isSame(lCands[c1]))) {
+          console.log("p: bs:" + curBar[0].y + "," + curBar[0].x + " st:" + lCands[c1].y + "," + lCands[c1].x)
           foundLs.push({stub:lCands[c1],barStart:curBar[0]})
           if (foundLs.length == stopAfter) {
             console.log("fl1:" + foundLs.length)
@@ -229,7 +229,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
       
       curPos.fadd(incr)
     }
-    console.log("bfound:" + bFound)
+    
   }
   
   return foundLs
@@ -277,22 +277,28 @@ LaGameField.prototype.findHBar = function(occField, startAt) {
 
 }
 
+LaGameField.lStubs = [
+  new V2d(0,-1), new V2d(0,1),
+  new V2d(2,-1), new V2d(2,1)
+]
+
 LaGameField.prototype.checkBarLs = function(occField, barStart, stopAfter) {
 
   lStubs = LaGameField.lStubs
-  var curPos = new V2d()
+  var curPos = new V2d(0,0)
   
   var matchLStubs = new Array()
   
   for (var c1 = 0; c1 < lStubs.length; c1++) {
     curPos = barStart.copy()
     curPos.add(lStubs[c1])
-    if (curPos.isOob) {
+    if (curPos.isOob()) {
       continue
     }
     
     if (occField[curPos.y][curPos.x] == 0) {
-      matchLStubs.push({stub:curPos})
+      console.log("stub:" + curPos.y + "," + curPos.x + " : " + c1)
+      matchLStubs.push(curPos)
       if (matchLStubs.length == stopAfter) {
         break
       }

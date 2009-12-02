@@ -80,7 +80,7 @@ LPiece.prototype.realise = function() {
 LPiece.prototype.isSame = function(rhs) {
 
   var lhsFields = this.realise()
-  var rhsFields = rhs.realise()
+  var rhsFields = rhs
   
   var isRepresented = false
   var allRepresented = true
@@ -94,6 +94,7 @@ LPiece.prototype.isSame = function(rhs) {
     }
     if (isRepresented == false) {
       allRepresented = false
+      break
     }
   }
   

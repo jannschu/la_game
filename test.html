@@ -48,6 +48,16 @@
 
     mField = new LaGameField()
     
+    var mlStubs = mField.checkBarLs(mField.getOcc([ mField.lPieces[0], mField.nPieces[0], mField.nPieces[1] ]), new V2d(1,0), 100)
+    
+    if (mlStubs.length == 0) {
+      console.log("nomls")
+    }
+    
+    for (var d1 = 0; d1 < mlStubs; d1++) {
+      console.log("ml:" + mlStubs[d1].y + "," + mlStubs[d1].x)
+    }
+    /*
     var hbars = "go"
     var hbarsnum = 0
     var startAt = new V2d(0,0)
@@ -78,7 +88,7 @@
     console.log("hbarsnum:" + hbarsnum)
     
     return
-    
+    */
     emptyLs = mField.getEmptyLs(0, 100)
     var outp = "el:" + emptyLs.length
     for (var c1 = 0; c1 < emptyLs.length; c1++) {
