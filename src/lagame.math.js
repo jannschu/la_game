@@ -59,7 +59,7 @@ V2d.prototype.isEqual = function (rhs) {
   return false
 }
 
-V2d.prototype.isOob = function () {
+V2d.prototype.isOutOfBox = function () {
   if (this.x < 0 || this.y < 0 || this.x > 3 || this.y > 3) {
     return true
   }

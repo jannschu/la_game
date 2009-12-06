@@ -298,7 +298,7 @@ LaGameField.prototype.checkBarLs = function(occField, barStart, stopAfter) {
   for (var c1 = 0; c1 < lStubs.length; c1++) {
     curPos = barStart.copy()
     curPos.add(lStubs[c1])
-    if (curPos.isOob()) {
+    if (curPos.isOutOfBox()) {
       continue
     }
     
