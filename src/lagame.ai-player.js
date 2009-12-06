@@ -54,6 +54,8 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   this.canMoveNeutral = !!neutral;
   this.endMoveCallback = callback;
   
+  me = this.gui
+  
   tempField = this.logic.field.copy();
   
   var hasOptimal = false;
@@ -61,20 +63,22 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   allPos = this.getAllPositions(this.logic.field, this.playerNumber);
   var tempF = this.logic.field.copy()
   
-  for (d1 = 0; d1 < allPos.length; d1++) {
-    this.logic.field = allPos[d1]
-    setTimeOut("this.gui.drawGameBoard()", 500)
-  }
+  this.drawAllPos(allPos, 0)
   
   this.logic.field = tempF
   
-  while (hasOptimal == false) {
   
-    for (var c1 = 0; c1 < emptyLs.length; c1++) {
-      hasOptimal = true // foobar
-    }
-  
+}
+
+LaGameAiPlayer.prototype.drawAllPos = function(allPos, curNum) {
+  if (curNum == allPos.length-1) {
+    return
   }
+  this.logic.field = allPos[curNum]
+  var me = this
+  this.drawGameBoard()
+  curNum++
+  window.setTimeout(function() { me.drawAllPos(allPos, curNum) }, 500)
   
 }
 
@@ -142,35 +146,12 @@ LaGameAiPlayer.prototype.getCondensedLPieceFor = function(fields, player) {
 
 LaGameAiPlayer.prototype.drawGameBoard = function() {
   this.gui.drawGameBoard();
-  var mp = this.movingPiece;
-  var pieces;
-  if (mp) {
-    if (mp instanceof NPiece) {
-      pieces = [this.logic.getNPieces()[makeOpposite(mp.nid)]].
-        concat(this.logic.getLPieces());
-      this.gui.setNeutral(mp, true);
-    } else {
-      pieces = [this.logic.getLPieces()[makeOpposite(this.playerNumber)]].
-        concat(this.logic.getNPieces());
-      this.gui.setLPiece(mp, true);
-    }
-    
-  } else {
-    pieces = this.logic.getNPieces().concat(this.logic.getLPieces());
-  }
-  var piece;
-  for (var p = 0; p < pieces.length; ++p) {
-    piece = pieces[p];
-    if (piece instanceof NPiece) {
-      this.gui.setNeutral(piece);
-    }
-    else {
-      this.gui.setLPiece(piece);
-    }
-  }
-  if (this.draggedFields != []) {
-    this.gui.setLFields(this.draggedFields, this.playerNumber);
-  }
+  
+  this.gui.setLPiece(this.logic.field.lPieces[0])
+  this.gui.setLPiece(this.logic.field.lPieces[1])
+  this.gui.setNeutral(this.logic.field.nPieces[0])
+  this.gui.setNeutral(this.logic.field.nPieces[1])
+  
 };
 
 
@@ -191,6 +172,7 @@ LaGameAiPlayer.prototype.getAllPositions = function(field, player) {
     for (var nP = 0; nP < 2; nP++) {
       console.log("np:" + nP)
       emptyNs = tempField.getEmptyNs(nP)
+      console.log(emptyNs.length)
       for (var c2 = 0; c2 < emptyNs.length; c2++) {
         tempField.nPieces[nP] = emptyNs[c2]
         allPos.push(tempField.copy())

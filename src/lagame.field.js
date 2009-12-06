@@ -171,13 +171,28 @@ LaGameField.prototype.getEmptyNs = function(excludeNid) {
   
   var emptyNs = new Array()
   
-  while (curPos.y < 4 || curPos.x < 3) {
+  console.log("new cp")
+  
+  var firstOver = false
+  
+  var atEnd = false
+  
+  while (atEnd == false) {
+    console.log("cp:" + curPos.y + "," + curPos.x)
     if (field[curPos.y][curPos.x] == 0) {
       emptyNs.push(new NPiece(curPos.copy(), excludeNid))
     }
+    
     curPos.addInBox(incr)
+    if (curPos.y == 0 && curPos.x == 0) {
+      if (firstOver == false) {
+        firstOver = true
+      }
+      else {
+        atEnd = true
+      }
+    }
   }
-
   return emptyNs
 
 }
