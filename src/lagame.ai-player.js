@@ -209,7 +209,7 @@ LaGameAiPlayer.prototype.getAllPositions = function(field, player) {
       emptyNs = tempField.getEmptyNs(nP)
       for (var c2 = 0; c2 < emptyNs.length; c2++) {
         tempField.nPieces[nP] = emptyNs[c2]
-        //allPos.push(tempField.copy())
+        allPos.push(tempField.copy())
       }
     }
   }
