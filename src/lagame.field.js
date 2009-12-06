@@ -142,7 +142,7 @@ LaGameField.prototype.getEmptyNs = function(excludeNid) {
   var candidates = new Array( this.lPieces[0], this.lPieces[1] )
   candidates.push(this.nPieces[makeOpposite(excludeNid)])
   
-  var field = this.getOcc(candidates)
+  var field = this.getOccupiedField(candidates)
   
   var incr = new V2d(1,0)
   
@@ -244,7 +244,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
           //console.log("p: bs:" + curBar[0].y + "," + curBar[0].x + " st:" + lCands[c1].y + "," + lCands[c1].x)
           foundLs.push([
             lCands[c1].swapPointsIf(rot),
-            curBar[0].condRot(swapPointsIf),
+            curBar[0].swapPointsIf(rot),
             curBar[1].swapPointsIf(rot),
             curBar[2].swapPointsIf(rot)])
           if (foundLs.length == stopAfter) {
