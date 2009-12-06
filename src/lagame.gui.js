@@ -157,6 +157,68 @@ LaGameGUI.prototype.setCollision = function(x, y, color) {
 }
 
 /**
+ * Animates a move action
+ * @param (LaGameField) oldField the field before the move
+ * @param (LaGameField) newField the field after the move
+ * @param (Function) callback the function which will be called after animation
+ */
+LaGameGUI.prototype.animateMove = function(oldField, newField, callback) {
+  var gui = this;
+  var moveNPiece = function(oldN, newN) {
+    gui.unsetNeutral(oldN);
+    gui.setNeutral(oldN, true);
+    setTimeout(function() {
+      gui.unsetNeutral(oldN);
+      gui.setNeutral(newN);
+    }, 1200);
+    return 1200;
+  };
+  var moveLPiece = function(oldL, newL) {
+    gui.unsetLPiece(oldL);
+    gui.setLPiece(oldL, true);
+    var fields = newL.realise();
+    setTimeout(function() { gui.setLFields(fields.slice(0, 1))}, 500);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 2))}, 1000);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 3))}, 1500);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 4))}, 2000);
+    setTimeout(function() {
+      gui.unsetLPiece(oldL);
+      gui.setLPiece(newL);
+    }, 2200);
+    return 2200;
+  }
+  var oldPieces = oldField.lPieces.concat(oldField.nPieces);
+  var newPieces = newField.lPieces;
+  if (newField.nPieces[0].isSame(oldField.nPieces[1])) {
+    newPieces = newPieces.concat([newField.nPieces[1], newField.nPieces[0]]);
+  } else {
+    newPieces = newPieces.concat(newField.nPieces);
+  }
+  var isSameLPiecePosition = function(a, b) {
+    return a.pos.isEqual(b.pos) && a.rot == b.rot && a.inv == b.inv;
+  };
+  var animatePieces = function() {
+    if (oldPieces.length == 0) {
+      if (callback) setTimeout(callback, 0);
+      return;
+    }
+    var oldPiece = oldPieces[0];
+    var newPiece = newPieces[0];
+    oldPieces = oldPieces.slice(1);
+    newPieces = newPieces.slice(1);
+    var timeout = 0;
+    if (oldPiece instanceof NPiece && newPiece instanceof NPiece) {
+      if (!oldPiece.isSame(newPiece)) timeout = moveNPiece(oldPiece, newPiece);
+    } else if (oldPiece instanceof LPiece && newPiece instanceof LPiece) {
+      if (!isSameLPiecePosition(oldPiece, newPiece))
+        timeout = moveLPiece(oldPiece, newPiece);
+    }
+    setTimeout(animatePieces, timeout + 300);
+  }
+  animatePieces();
+};
+
+/**
  * Draws the basic game board with its borders and lines
  */
 LaGameGUI.prototype.drawGameBoard = function() {
