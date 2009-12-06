@@ -62,6 +62,10 @@ LaGamePlayer.prototype.startMoving = function(l, neutral, callback) {
   
   this.doingMove = true;
   
+  if (!this.canMoveL && this.canMoveNeutral) {
+    this.gui.setCanFinishTurn(true);
+  }
+  
   this.registerChooseEvents();
 };
 // notRedraw: true will not draw it, false will draw it

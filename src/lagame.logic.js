@@ -171,10 +171,6 @@ LaGameLogic.prototype.doMove = function(move) {
   
   this.players[this.curPlayer].stopMoving();
   
-  if (!this.playerCanMoveL && this.playerCanMoveN) {
-    this.gui.setCanFinishTurn(true);
-  }
-  
   /* If both playerCan* vars are false, it's the other player's turn */
   if (this.playerCanMoveL == false && this.playerCanMoveN == false) {
     this.switchPlayers()
