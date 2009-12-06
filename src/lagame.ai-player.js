@@ -59,7 +59,7 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   var allPos = this.getAllPositions(this.logic.field, this.playerNumber);
 
   for (var c1 = 0; c1 < allPos.length; c1++) {
-    if (allPos[c1].getEmptyLs(this.playerNumber, 1).length == 0) {
+    if (allPos[c1].getEmptyLs(makeOpposite(this.playerNumber), 1).length == 0) {
       this.logic.field = allPos[c1]
       hasOptimal = true
     }
