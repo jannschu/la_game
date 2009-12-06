@@ -33,7 +33,7 @@
     currentGame = null;
     function newGame() {
       if (currentGame) currentGame.stopGame();
-      
+      updateGameMode();
       var playerLabel = document.getElementById('currentPlayer');
       var nextPlayer = document.getElementById('nextPlayer');
       var canvas = document.getElementById('laGameCanvas');
@@ -52,6 +52,14 @@
       logic.initializeGame();
     }
     
+    function updateGameMode() {
+      var mode = document.getElementById('versusMode').value;
+      switch (mode) {
+        case "0": playerInput = [LaGamePlayer, LaGamePlayer]; break;
+        case "1": playerInput = [LaGamePlayer, LaGameAiPlayer]; break;
+      }
+    }
+    
     window.onload = function() {
       playerInput = [LaGamePlayer, LaGamePlayer];
       var newGameCheck = function() {
@@ -60,10 +68,7 @@
       };
       document.getElementById('newGame').addEventListener('click', newGameCheck, false);
       document.getElementById('versusMode').addEventListener('change', function() {
-        switch (this.value) {
-          case "0": playerInput = [LaGamePlayer, LaGamePlayer]; break;
-          case "1": playerInput = [LaGamePlayer, LaGameAiPlayer]; break;
-        }
+        updateGameMode();
         newGameCheck();
       }, false);
       newGame();
