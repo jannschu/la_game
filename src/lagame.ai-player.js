@@ -71,14 +71,14 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
 }
 
 LaGameAiPlayer.prototype.drawAllPos = function(allPos, curNum) {
-  if (curNum == allPos.length-1) {
+  if (curNum == allPos.length) {
     return
   }
   this.logic.field = allPos[curNum]
   var me = this
   this.drawGameBoard()
   curNum++
-  window.setTimeout(function() { me.drawAllPos(allPos, curNum) }, 500)
+  window.setTimeout(function() { me.drawAllPos(allPos, curNum) }, 100)
   
 }
 
