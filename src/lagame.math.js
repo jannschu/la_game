@@ -37,37 +37,35 @@ V2d.prototype.sub = function(rhs) {
   return this
 }
 
-/* Field add */
-V2d.prototype.fadd = function (rhs) {
+/**
+ * Adds the vector, but the new vector will always be
+ * relative to the box
+ */
+V2d.prototype.addInBox = function(rhs) {
   var xSum = Math.abs(rhs.x + this.x);
   this.x = xSum % 4;
   this.y = Math.abs(rhs.y + this.y + Math.floor(xSum / 4)) % 4;
   return this
 }
 
-/* Field sub */
-V2d.prototype.fsub = function (rhs) {
-  this.fadd(new V2d(-rhs.x, -rhs.y))
+/**
+ * Subtracts the vector, but the new vector will always be
+ * relative to the box
+ */
+V2d.prototype.subInBox = function(rhs) {
+  this.addInBox(new V2d(-rhs.x, -rhs.y))
   return this
 }
 
-V2d.prototype.isEqual = function (rhs) {
-  if (this.x == rhs.x && this.y == rhs.y) {
-    return true
-  }
-  
-  return false
+V2d.prototype.isEqual = function(rhs) {
+  return this.x == rhs.x && this.y == rhs.y
 }
 
-V2d.prototype.isOutOfBox = function () {
-  if (this.x < 0 || this.y < 0 || this.x > 3 || this.y > 3) {
-    return true
-  }
-  
-  return false
+V2d.prototype.isOutOfBox = function() {
+  return this.x < 0 || this.y < 0 || this.x > 3 || this.y > 3
 }
 
-V2d.prototype.rot = function () {
+V2d.prototype.rotateAntiClockwise = function() {
   var tempX = this.x
   this.x = this.y
   this.y = tempX
@@ -75,13 +73,13 @@ V2d.prototype.rot = function () {
   return this
 }
 
-V2d.prototype.condRot = function (rot) {
-
+V2d.prototype.condRot = function(rot) {
+  
   if (rot == null || rot == 0) {
     return this
   }
   else {
-    return this.rot()
+    return this.rotateAntiClockwise()
   }
 
 }

@@ -235,7 +235,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
         }
       }
       
-      curPos.fadd(incr)
+      curPos.addInBox(incr)
     }
     
   }
