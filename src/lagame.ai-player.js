@@ -170,6 +170,8 @@ LaGameAiPlayer.prototype.getAllPositions = function(field, player) {
     tempField.lPieces[player] = this.getCondensedLPieceFor(emptyLs[c1], player)
     
     for (var nP = 0; nP < 2; nP++) {
+      tempField = field.copy()
+      tempField.lPieces[player] = this.getCondensedLPieceFor(emptyLs[c1], player)
       console.log("np:" + nP)
       emptyNs = tempField.getEmptyNs(nP)
       console.log(emptyNs.length)
