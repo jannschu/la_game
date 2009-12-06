@@ -117,45 +117,24 @@ LaGameField.prototype.rotateField = function() {
   this.lPieces[1] = rotateLPiece(this.lPieces[1]);
 };
 
-/* TODO: cache those as well */
-/* TODO: maybe just delta-modification instead of always re-initialization */
 /**
- * Get occupied fields.
- * @param {PieceArray} candidates The pieces to include in estimating stuff
+ * Returns two dimensional array with 0 for empty field and 1 for non-empty
+ * @param {PieceArray} pieces The pieces to include in estimating stuff
  */
-LaGameField.prototype.getOcc = function(candidates) {
-
-  var field = []
+LaGameField.prototype.getOccupiedField = function(pieces) {
+  var field = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
   
-  for (var c1 = 0; c1 < 4; c1++) {
-    field.push(new Array(4))
-    for (var c2 = 0; c2 < 4; c2++) {
-      field[c1][c2] = 0
-    }
-  }
+  var realisedFields = []  
+  for (var i = 0; i < pieces.length; ++i)
+    realisedFields = realisedFields.concat(pieces[i].realise())
   
-  var curPieceFields = []
-  var allPieceFields = []
+  for (var i = 0; i < realisedFields.length; ++i)
+    field[realisedFields[i].y][realisedFields[i].x] = 1
   
-  for (var c1 = 0; c1 < candidates.length; c1++) {
-    curPieceFields = candidates[c1].realise()
-    allPieceFields = allPieceFields.concat(curPieceFields)
-  }
-  
-  for (var c1 = 0; c1 < allPieceFields.length; c1++) {
-  
-    field[allPieceFields[c1].y][allPieceFields[c1].x] = 1
-  
-  }
-          var outp = "\n"
-      for (var d1 = 0; d1 < 4; d1++) {
-        outp += "\n"
-        for (var d2 = 0; d2 < 4; d2++) {
-          outp += field[d1][d2]
-        }
-      }      //console.log(outp)
+  // var outp = ""
+  // for(var d = 0; d < field.length; ++d) outp += field[d].join("") + "\n";
+  // console.log(outp)
   return field
-
 }
 
 LaGameField.prototype.getEmptyNs = function(excludeNid) {
@@ -199,7 +178,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
   var candidates = new Array( this.lPieces[makeOpposite(excludeLid)] )
   candidates = candidates.concat(this.nPieces)
   
-  var field = this.getOcc(candidates)
+  var field = this.getOccupiedField(candidates)
 
   /* TODO: sth with rotation, checking for stopAfter == 0, ... dunno */
   
@@ -261,9 +240,13 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
      
       for (var c1 = 0; c1 < lCands.length; c1++) {
         //console.log("checkingp: " + lCands[c1].y + "," + lCands[c1].x)
-        if (!(this.lPieces[excludeLid].isSame(curBar.concat(lCands[c1]), rot))) {
+        if (!(this.lPieces[excludeLid].hasTheFields(curBar.concat(lCands[c1]), rot))) {
           //console.log("p: bs:" + curBar[0].y + "," + curBar[0].x + " st:" + lCands[c1].y + "," + lCands[c1].x)
-          foundLs.push(new Array(lCands[c1].condRot(rot),curBar[0].condRot(rot),curBar[1].condRot(rot),curBar[2].condRot(rot)))
+          foundLs.push([
+            lCands[c1].swapPointsIf(rot),
+            curBar[0].condRot(swapPointsIf),
+            curBar[1].swapPointsIf(rot),
+            curBar[2].swapPointsIf(rot)])
           if (foundLs.length == stopAfter) {
             //console.log("fl1:" + foundLs.length)
             return foundLs
