@@ -410,7 +410,7 @@ LaGamePlayer.prototype.drawGameBoard = function() {
     if (mp instanceof NPiece) {
       pieces = [this.logic.getNPieces()[makeOpposite(mp.nid)]].
         concat(this.logic.getLPieces());
-      this.gui.setNeutral(mp, true);
+      this.gui.setNPiece(mp, true);
     } else {
       pieces = [this.logic.getLPieces()[makeOpposite(this.playerNumber)]].
         concat(this.logic.getNPieces());
@@ -424,7 +424,7 @@ LaGamePlayer.prototype.drawGameBoard = function() {
   for (var p = 0; p < pieces.length; ++p) {
     piece = pieces[p];
     if (piece instanceof NPiece) {
-      this.gui.setNeutral(piece);
+      this.gui.setNPiece(piece);
     }
     else {
       this.gui.setLPiece(piece);

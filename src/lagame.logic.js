@@ -75,8 +75,8 @@ LaGameLogic.prototype.initializeGame = function() {
   // TODO place start pieces randomly
   this.gui.drawGameBoard();
   var neutrals = this.getNPieces();
-  this.gui.setNeutral(neutrals[0]);
-  this.gui.setNeutral(neutrals[1]);
+  this.gui.setNPiece(neutrals[0]);
+  this.gui.setNPiece(neutrals[1]);
   var l = this.getLPieces();
   this.gui.setLPiece(l[0]);
   this.gui.setLPiece(l[1]);

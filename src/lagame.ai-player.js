@@ -149,8 +149,8 @@ LaGameAiPlayer.prototype.drawGameBoard = function() {
   
   this.gui.setLPiece(this.logic.field.lPieces[0])
   this.gui.setLPiece(this.logic.field.lPieces[1])
-  this.gui.setNeutral(this.logic.field.nPieces[0])
-  this.gui.setNeutral(this.logic.field.nPieces[1])
+  this.gui.setNPiece(this.logic.field.nPieces[0])
+  this.gui.setNPiece(this.logic.field.nPieces[1])
   
 };
 
