@@ -170,22 +170,48 @@ LaGameGUI.prototype.animateMove = function(oldField, newField, callback) {
     setTimeout(function() {
       gui.unsetNeutral(oldN);
       gui.setNeutral(newN);
-    }, 1200);
-    return 1200;
+    }, 700);
+    return 700;
+  };
+  var isNeighbour = function(a, b) {
+    return (a.x == b.x && Math.abs(a.y - b.y) == 1) ||
+           (a.y == b.y && Math.abs(a.x- b.x) == 1)
+  };
+  var sortFieldsAsIfDragged = function(fields) {
+    var startField, neighbours;
+    for (var i = 0; i < fields.length; ++i) {
+      neighbours = 0;
+      startField = fields[i];
+      for (var p = 0; p < fields.length; ++p) {
+        if (p == i) continue;
+        if (neighbours > 1) break;
+        if (isNeighbour(fields[p], startField)) ++ neighbours;
+      }
+      if (neighbours == 1) break;
+    }
+    var sortedFields = [startField];
+    for (var j = 0; sortedFields.length < 4; j == fields.length - 1 ? j = 0 : ++j) {
+      if (isNeighbour(fields[j], sortedFields[sortedFields.length - 1])) {
+        sortedFields.push(fields[j]);
+        fields = fields.slice(0, j).concat(fields.slice(j + 1));
+      }
+    }
+    console.log(sortedFields)
+    return sortedFields;
   };
   var moveLPiece = function(oldL, newL) {
     gui.unsetLPiece(oldL);
     gui.setLPiece(oldL, true);
-    var fields = newL.realise();
-    setTimeout(function() { gui.setLFields(fields.slice(0, 1))}, 500);
-    setTimeout(function() { gui.setLFields(fields.slice(0, 2))}, 1000);
-    setTimeout(function() { gui.setLFields(fields.slice(0, 3))}, 1500);
-    setTimeout(function() { gui.setLFields(fields.slice(0, 4))}, 2000);
+    var fields = sortFieldsAsIfDragged(newL.realise());
+    setTimeout(function() { gui.setLFields(fields.slice(0, 1))}, 300);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 2))}, 600);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 3))}, 900);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 4))}, 1200);
     setTimeout(function() {
       gui.unsetLPiece(oldL);
       gui.setLPiece(newL);
-    }, 2200);
-    return 2200;
+    }, 1500);
+    return 1500;
   }
   var oldPieces = oldField.lPieces.concat(oldField.nPieces);
   var newPieces = newField.lPieces;
