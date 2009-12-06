@@ -88,9 +88,12 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   
   //return
   
+  var ap
+  
   for (var c1 = 0;  c1 < allPos.length; c1++) {
     console.log("apn:" + c1)
-    this.getAllPositions(allPos[c1], playerNum)
+    ap = this.getAllPositions(allPos[c1], playerNum)
+    console.log("apnn:"+ap.length)
   }
   
   console.log("ap:" + allPos.length)
@@ -109,7 +112,7 @@ LaGameAiPlayer.prototype.drawAllPos = function(allPos, curNum) {
   var me = this
   this.drawGameBoard()
   curNum++
-  window.setTimeout(function() { me.drawAllPos(allPos, curNum) },600)
+  window.setTimeout(function() { me.drawAllPos(allPos, curNum) },50)
   
 }
 
