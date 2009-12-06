@@ -31,8 +31,5 @@ NPiece.prototype.realise = function() {
 
 /* TODO: discuss: nid? */
 NPiece.prototype.isSame = function(rhs) {
-  if (this.pos.isEqual(rhs.pos) == true) {
-    return true
-  }
-  return false
+  return this.pos.isEqual(rhs.pos);
 }

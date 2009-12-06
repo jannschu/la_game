@@ -24,7 +24,6 @@
  * @param {PlayerVal} player The piece's "owner"
  */
 function LPiece(pos, rot, inv, player) {
-
   this.pos = pos
   this.rot = rot
   this.inv = inv
@@ -33,7 +32,6 @@ function LPiece(pos, rot, inv, player) {
   /* Cache */
   this.cachedFields = []
   this.cachedVals = {pos: pos, rot: rot, inv: inv}
-
 }
 
 LPiece.prototype.copy = function() {
@@ -44,41 +42,37 @@ LPiece.prototype.copy = function() {
   return copy;
 };
 
-LPiece.rVals = [
+LPiece.relativeRealisePoints = [
   [ new V2d(1,0), new V2d(2,0), new V2d(0,-1) ], // rot 0
   [ new V2d(-1,0), new V2d(0,-1), new V2d(0,-2) ], // rot 1
   [ new V2d(0,1), new V2d(-1,0), new V2d(-2,0) ], // rot 2
   [ new V2d(1,0), new V2d(0,1), new V2d(0,2) ]  // rot 3
 ]
-
+/**
+ * Returns the fields, where the L-piece is. It converts the
+ * condensed form to its real positions.
+ */
 LPiece.prototype.realise = function() {
-  
-  if (this.cacheIsUpToDate() == true) {
+  if (this.cacheIsUpToDate()) {
     return this.cachedFields
   }
   
   var fields = [ new V2d(this.pos.x, this.pos.y) ]
-  var curRVals = LPiece.rVals[this.rot]
-  var invMul = 1
-  if (this.inv == true) {
-    invMul = -1
-  }
+  var relativePositions = LPiece.relativeRealisePoints[this.rot]
+  var inverseModifier = this.inv ? -1 : 1
   
   var curField
-  
-  for (var c1 = 0; c1 < curRVals.length; c1++) {
-    curField = curRVals[c1].copy()
-    curField.x *= invMul
+  for (var i = 0; i < relativePositions.length; ++i) {
+    curField = relativePositions[i].copy()
+    curField.x *= inverseModifier
     curField.add(this.pos)
     fields.push(curField)
   }
   this.cachedFields = fields /* TODO: discuss: copy? */
   return fields
-
 }
 
-LPiece.prototype.realiseRot = function() {
-  /* Realise the rot you're saying. Get it? Haha. Incredibly funny. */
+LPiece.prototype.realiseAndSwapPoints = function() {
   fields = this.realise()
   tempfields = fields.copy()
   for (var c1 = 0; c1 < fields.length; c1++) {
@@ -87,68 +81,44 @@ LPiece.prototype.realiseRot = function() {
   }
   
   return tempfields
-  
 }
 
-LPiece.prototype.isSame = function(rhs, rot) {
-
-  var lhsFields
+/**
+ * @param {V2d[]} fields The fields which should be checked
+ * @param {Boolean} rot Shall the points be swapped?
+ */
+LPiece.prototype.hasTheFields = function(testFields, rot) {
+  if (testFields.length != 4) return false;
   
-  if (rot == null || rot == 0) {
-    lhsFields = this.realise()
-  }
-  else {
-    //console.log("realiserot")
-    lhsFields = this.realiseRot()
-  }
+  var fields = rot ? this.realiseAndSwapPoints() : this.realise();
   
-  var rhsFields = rhs
-  
-  var isRepresented = false
-  var allRepresented = true
-  
-  for (var c1 = 0; c1 < lhsFields.length; c1++) {
-    isRepresented = false
-    for (var c2 = 0; c2 < rhsFields.length; c2++) {
-      if (lhsFields[c1].isEqual(rhsFields[c2]) == true) {
-        isRepresented = true
+  var found;
+  for (var i = 0; i < fields.length; ++i) {
+    found = false;
+    for (var j = 0; j < testFields.length; ++j) {
+      if (fields[i].isEqual(testFields[j])) {
+        found = true;
+        break;
       }
     }
-    if (isRepresented == false) {
-      allRepresented = false
-      break
-    }
+    if (!found) return false;
   }
   
-  return allRepresented
-
+  return true;
 }
 
 /* ************************************************************************ */
-
 /* PRIVATE */
-
 /* ************************************************************************ */
 
-
 LPiece.prototype.cacheIsUpToDate = function() {
-
-  if (this.cachedFields.length == 0) {
-    return false
-  }
+  if (this.cachedFields.length == 0) return false;
   
-  if (
-    this.pos != this.cachedVals.pos ||
-    this.rot != this.cachedVals.rot ||
-    this.inv != this.cachedVals.inv
-  ) {
-  
-    return false
-  
-  }
-  
-  return true
-
+  return (
+    this.pos == this.cachedVals.pos &&
+    this.rot == this.cachedVals.rot &&
+    this.inv == this.cachedVals.inv
+  );
 }
 
 

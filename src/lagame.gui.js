@@ -157,6 +157,93 @@ LaGameGUI.prototype.setCollision = function(x, y, color) {
 }
 
 /**
+ * Animates a move action
+ * @param (LaGameField) oldField the field before the move
+ * @param (LaGameField) newField the field after the move
+ * @param (Function) callback the function which will be called after animation
+ */
+LaGameGUI.prototype.animateMove = function(oldField, newField, callback) {
+  var gui = this;
+  var moveNPiece = function(oldN, newN) {
+    gui.unsetNeutral(oldN);
+    gui.setNeutral(oldN, true);
+    setTimeout(function() {
+      gui.unsetNeutral(oldN);
+      gui.setNeutral(newN);
+    }, 700);
+    return 700;
+  };
+  var isNeighbour = function(a, b) {
+    return (a.x == b.x && Math.abs(a.y - b.y) == 1) ||
+           (a.y == b.y && Math.abs(a.x- b.x) == 1)
+  };
+  var sortFieldsAsIfDragged = function(fields) {
+    var startField, neighbours;
+    for (var i = 0; i < fields.length; ++i) {
+      neighbours = 0;
+      startField = fields[i];
+      for (var p = 0; p < fields.length; ++p) {
+        if (p == i) continue;
+        if (neighbours > 1) break;
+        if (isNeighbour(fields[p], startField)) ++ neighbours;
+      }
+      if (neighbours == 1) break;
+    }
+    var sortedFields = [startField];
+    for (var j = 0; sortedFields.length < 4; j == fields.length - 1 ? j = 0 : ++j) {
+      if (isNeighbour(fields[j], sortedFields[sortedFields.length - 1])) {
+        sortedFields.push(fields[j]);
+        fields = fields.slice(0, j).concat(fields.slice(j + 1));
+      }
+    }
+    return sortedFields;
+  };
+  var moveLPiece = function(oldL, newL) {
+    gui.unsetLPiece(oldL);
+    gui.setLPiece(oldL, true);
+    var fields = sortFieldsAsIfDragged(newL.realise());
+    setTimeout(function() { gui.setLFields(fields.slice(0, 1))}, 300);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 2))}, 600);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 3))}, 900);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 4))}, 1200);
+    setTimeout(function() {
+      gui.unsetLPiece(oldL);
+      gui.setLPiece(newL);
+    }, 1500);
+    return 1500;
+  }
+  var oldPieces = oldField.lPieces.concat(oldField.nPieces);
+  var newPieces = newField.lPieces;
+  if (newField.nPieces[0].isSame(oldField.nPieces[1])) {
+    newPieces = newPieces.concat([newField.nPieces[1], newField.nPieces[0]]);
+  } else {
+    newPieces = newPieces.concat(newField.nPieces);
+  }
+  var isSameLPiecePosition = function(a, b) {
+    return a.pos.isEqual(b.pos) && a.rot == b.rot && a.inv == b.inv;
+  };
+  var animatePieces = function() {
+    if (oldPieces.length == 0) {
+      if (callback) setTimeout(callback, 0);
+      return;
+    }
+    var oldPiece = oldPieces[0];
+    var newPiece = newPieces[0];
+    oldPieces = oldPieces.slice(1);
+    newPieces = newPieces.slice(1);
+    var timeout = 0;
+    if (oldPiece instanceof NPiece && newPiece instanceof NPiece) {
+      if (!oldPiece.isSame(newPiece)) timeout = moveNPiece(oldPiece, newPiece);
+    } else if (oldPiece instanceof LPiece && newPiece instanceof LPiece) {
+      if (!isSameLPiecePosition(oldPiece, newPiece))
+        timeout = moveLPiece(oldPiece, newPiece);
+    }
+    setTimeout(animatePieces, timeout + 300);
+  }
+  animatePieces();
+};
+
+/**
  * Draws the basic game board with its borders and lines
  */
 LaGameGUI.prototype.drawGameBoard = function() {
