@@ -139,8 +139,7 @@ LaGameField.prototype.getOccupiedField = function(pieces) {
 
 LaGameField.prototype.getEmptyNs = function(excludeNid) {
 
-  var candidates = new Array( this.lPieces[0], this.lPieces[1] )
-  candidates.push(this.nPieces[makeOpposite(excludeNid)])
+  var candidates = [ this.lPieces[0], this.lPieces[1], this.nPieces[makeOpposite(excludeNid)] ]
   
   var field = this.getOccupiedField(candidates)
   
@@ -150,7 +149,6 @@ LaGameField.prototype.getEmptyNs = function(excludeNid) {
   
   var emptyNs = new Array()
   
-  console.log("new cp")
   
   var firstOver = false
   
@@ -158,7 +156,6 @@ LaGameField.prototype.getEmptyNs = function(excludeNid) {
   
   while (atEnd == false) {
 
-    console.log("cp:" + curPos.y + "," + curPos.x)
     if (field[curPos.y][curPos.x] == 0) {
       emptyNs.push(new NPiece(curPos.copy(), excludeNid))
     }
@@ -244,9 +241,9 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
           //console.log("p: bs:" + curBar[0].y + "," + curBar[0].x + " st:" + lCands[c1].y + "," + lCands[c1].x)
           foundLs.push([
             lCands[c1].swapPointsIf(rot),
-            curBar[0].swapPointsIf(rot),
-            curBar[1].swapPointsIf(rot),
-            curBar[2].swapPointsIf(rot)])
+            curBar[0].copy().swapPointsIf(rot),
+            curBar[1].copy().swapPointsIf(rot),
+            curBar[2].copy().swapPointsIf(rot)])
           if (foundLs.length == stopAfter) {
             //console.log("fl1:" + foundLs.length)
             return foundLs

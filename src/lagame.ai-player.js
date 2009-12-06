@@ -56,13 +56,44 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   
   me = this.gui
   
-  tempField = this.logic.field.copy();
+  var tempField = this.logic.field.copy();
   
   var hasOptimal = false;
   
-  allPos = this.getAllPositions(this.logic.field, this.playerNumber);
+  var allPos = this.getAllPositions(this.logic.field, this.playerNumber);
   var tempF = this.logic.field.copy()
   
+  var playerNum = makeOpposite(this.playerNumber)
+  
+  this.logic.field = allPos[7]
+  var emptyLs = this.logic.field.getEmptyLs(1, Infinity)
+  tempField = this.logic.field.copy()
+  tempField.lPieces[1] = this.getCondensedLPieceFor(emptyLs[4], 1)
+  emptyNs = tempField.getEmptyNs(0)
+  
+  console.log("aL:"+emptyLs.length)
+  var outp = ""
+  for (var d1 = 0; d1 < emptyLs.length; d1++) {
+    outp="l"+d1+":\n"
+    for (var d2 = 0; d2 < emptyLs[d1].length; d2++) {
+      outp+=emptyLs[d1][d2].y+","+emptyLs[d1][d2].x+"\n"
+    }
+    console.log(outp)
+  }
+  
+  this.getAllPositions(allPos[7], 1)
+  this.drawGameBoard()
+  
+  //return
+  
+  //return
+  
+  for (var c1 = 0;  c1 < allPos.length; c1++) {
+    console.log("apn:" + c1)
+    this.getAllPositions(allPos[c1], playerNum)
+  }
+  
+  console.log("ap:" + allPos.length)
   this.drawAllPos(allPos, 0)
   
   this.logic.field = tempF
@@ -81,6 +112,7 @@ LaGameAiPlayer.prototype.drawAllPos = function(allPos, curNum) {
   window.setTimeout(function() { me.drawAllPos(allPos, curNum) },600)
   
 }
+
 
 LaGameAiPlayer.prototype.stopMoving = function(notRedraw) {
   if (!notRedraw) this.drawGameBoard();
@@ -165,19 +197,19 @@ LaGameAiPlayer.prototype.getAllPositions = function(field, player) {
   var emptyLs = field.getEmptyLs(player, Infinity)
   var emptyNs = 0
   
+  var tempL
+  
   for (var c1 = 0; c1 < emptyLs.length; c1++) {
-    tempField = field.copy()
-    tempField.lPieces[player] = this.getCondensedLPieceFor(emptyLs[c1], player)
-    
+    tempL = this.getCondensedLPieceFor(emptyLs[c1], player)
+    //console.log("curL:"+c1)
     for (var nP = 0; nP < 2; nP++) {
       tempField = field.copy()
-      tempField.lPieces[player] = this.getCondensedLPieceFor(emptyLs[c1], player)
-      console.log("np:" + nP)
+      //console.log("nP:"+nP)
+      tempField.lPieces[player] = tempL
       emptyNs = tempField.getEmptyNs(nP)
-      console.log(emptyNs.length)
       for (var c2 = 0; c2 < emptyNs.length; c2++) {
         tempField.nPieces[nP] = emptyNs[c2]
-        allPos.push(tempField.copy())
+        //allPos.push(tempField.copy())
       }
     }
   }
