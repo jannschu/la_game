@@ -225,7 +225,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
      
       for (var c1 = 0; c1 < lCands.length; c1++) {
         //console.log("checkingp: " + lCands[c1].y + "," + lCands[c1].x)
-        if (!(this.lPieces[excludeLid].isSame(curBar.concat(lCands[c1]), rot))) {
+        if (!(this.lPieces[excludeLid].hasTheFields(curBar.concat(lCands[c1]), rot))) {
           //console.log("p: bs:" + curBar[0].y + "," + curBar[0].x + " st:" + lCands[c1].y + "," + lCands[c1].x)
           foundLs.push({stub:lCands[c1].swapPointsIf(rot),barStart:curBar[0].swapPointsIf(rot)})
           if (foundLs.length == stopAfter) {
