@@ -53,6 +53,7 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   this.canMoveL = !!l;
   this.canMoveNeutral = !!neutral;
   this.endMoveCallback = callback;
+  var oldField = this.logic.field;
   
   var hasOptimal = false
   
@@ -66,16 +67,14 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   }
   
   if (!hasOptimal) {
-    this.logic.field = allPos[0]
+    this.logic.field = allPos[Math.round((allPos.length - 1) * Math.random())]
   }
-
-  this.drawGameBoard()
-
-  this.logic.playerCanMoveN = true
-  this.logic.playerCanMoveL = true
-  
-  this.logic.switchPlayers()
-  
+  var logic = this.logic;
+  this.gui.animateMove(oldField, logic.field, function() {
+    logic.playerCanMoveN = true
+    logic.playerCanMoveL = true
+    setTimeout(function() {logic.switchPlayers()}, 0);
+  })
 }
 
 LaGameAiPlayer.prototype.drawAllPos = function(allPos, curNum) {
