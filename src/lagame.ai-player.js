@@ -78,7 +78,7 @@ LaGameAiPlayer.prototype.drawAllPos = function(allPos, curNum) {
   var me = this
   this.drawGameBoard()
   curNum++
-  window.setTimeout(function() { me.drawAllPos(allPos, curNum) }, 100)
+  window.setTimeout(function() { me.drawAllPos(allPos, curNum) },600)
   
 }
 
