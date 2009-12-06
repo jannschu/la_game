@@ -196,7 +196,6 @@ LaGameGUI.prototype.animateMove = function(oldField, newField, callback) {
         fields = fields.slice(0, j).concat(fields.slice(j + 1));
       }
     }
-    console.log(sortedFields)
     return sortedFields;
   };
   var moveLPiece = function(oldL, newL) {
