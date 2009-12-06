@@ -65,7 +65,7 @@ V2d.prototype.isOutOfBox = function() {
   return this.x < 0 || this.y < 0 || this.x > 3 || this.y > 3
 }
 
-V2d.prototype.rotateAntiClockwise = function() {
+V2d.prototype.swapPoints = function() {
   var tempX = this.x
   this.x = this.y
   this.y = tempX
@@ -73,14 +73,7 @@ V2d.prototype.rotateAntiClockwise = function() {
   return this
 }
 
-V2d.prototype.condRot = function(rot) {
-  
-  if (rot == null || rot == 0) {
-    return this
-  }
-  else {
-    return this.rotateAntiClockwise()
-  }
-
+V2d.prototype.swapPointsIf = function(rot) {
+  return rot ? this.swapPoints() : this;
 }
 
