@@ -115,6 +115,7 @@ function makeOpposite(of) {
   }
   else {
     console.log(of)
+    console.trace()
     throw("wtf are you doing? (calling makeOpposite() with neither 0 nor 1)")
   }
 }

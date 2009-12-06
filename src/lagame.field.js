@@ -163,7 +163,7 @@ LaGameField.prototype.getEmptyNs = function(excludeNid) {
   var candidates = new Array( this.lPieces[0], this.lPieces[1] )
   candidates.push(this.nPieces[makeOpposite(excludeNid)])
   
-  var field = getOcc(candidates)
+  var field = this.getOcc(candidates)
   
   var incr = new V2d(1,0)
   
@@ -175,7 +175,7 @@ LaGameField.prototype.getEmptyNs = function(excludeNid) {
     if (field[curPos.y][curPos.x] == 0) {
       emptyNs.push(new NPiece(curPos.copy(), excludeNid))
     }
-    curPos.fadd(incr)
+    curPos.addInBox(incr)
   }
 
   return emptyNs
