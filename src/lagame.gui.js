@@ -70,7 +70,7 @@ LaGameGUI.prototype.coordToPoint = function(cX, cY) {
  * @param {Boolean} choosing true if it should print the L-Piece in the 'user 
  * chooses a positon' mode (maybe transparent)
  */
-LaGameGUI.prototype.setNeutral = function(npiece, choosing) {
+LaGameGUI.prototype.setNPiece = function(npiece, choosing) {
   var x = npiece.pos.x;
   var y = npiece.pos.y;
   var canX = (this.border + this.fieldSize) * x + this.fieldSize / 2 + this.border;
@@ -85,7 +85,7 @@ LaGameGUI.prototype.setNeutral = function(npiece, choosing) {
 /**
  * @param {NPiece} npiece
  */
-LaGameGUI.prototype.unsetNeutral = function(npiece) {
+LaGameGUI.prototype.unsetNPiece = function(npiece) {
   var canX = (this.border + this.fieldSize) * npiece.pos.x + this.border;
   var canY = (this.border + this.fieldSize) * npiece.pos.y + this.border;
   var ctx = this.canvas.getContext('2d');
@@ -165,11 +165,11 @@ LaGameGUI.prototype.setCollision = function(x, y, color) {
 LaGameGUI.prototype.animateMove = function(oldField, newField, callback) {
   var gui = this;
   var moveNPiece = function(oldN, newN) {
-    gui.unsetNeutral(oldN);
-    gui.setNeutral(oldN, true);
+    gui.unsetNPiece(oldN);
+    gui.setNPiece(oldN, true);
     setTimeout(function() {
-      gui.unsetNeutral(oldN);
-      gui.setNeutral(newN);
+      gui.unsetNPiece(oldN);
+      gui.setNPiece(newN);
     }, 700);
     return 700;
   };
