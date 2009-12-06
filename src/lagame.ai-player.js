@@ -30,3 +30,177 @@
 
  * :NALP EHT
  */
+
+function LaGameAiPlayer(playerNumber, gui, logic) {
+
+  this.playerNumber = playerNumber; // public
+  this.gui = gui; // public
+  this.logic = logic; // public
+
+  this.canMoveL = false; // public
+  this.canMoveNeutral = false; // public
+  this.endMoveCallback = null;
+
+}
+
+LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
+
+  if (this.gui.getCurrentPlayerForLabel() != this.playerNumber) 
+    this.gui.setPlayerLabel("Spieler " + (this.playerNumber + 1) + " (KI) ist dran",
+      this.playerNumber
+    )
+
+  this.canMoveL = !!l;
+  this.canMoveNeutral = !!neutral;
+  this.endMoveCallback = callback;
+  
+  tempField = this.logic.field.copy();
+  
+  var hasOptimal = false;
+  
+  var emptyLs = tempField.getEmptyLs();
+  
+  allPos = this.getAllPos(this.logic.field, this.playerNumber);
+  var tempF = this.logic.field.copy()
+  
+  for (d1 = 0; d1 < allPos.length; d1++) {
+    this.logic.field = allPos[d1]
+    setTimeOut("this.gui.drawGameBoard()", 500)
+  }
+  
+  this.logic.field = tempF
+  
+  while (hasOptimal == false) {
+  
+    for (var c1 = 0; c1 < emptyLs.length; c1++) {
+      hasOptimal = true // foobar
+    }
+  
+  }
+  
+}
+
+LaGameAiPlayer.prototype.stopMoving = function(notRedraw) {
+  if (!notRedraw) this.drawGameBoard();
+};
+
+LaGameAiPlayer.prototype.callEndCallback = function(newPiece) {
+  var callback = this.endMoveCallback;
+  if (callback)
+    window.setTimeout(function() { callback(newPiece) }, 0);
+};
+
+
+/* Duplicate code FTW */
+LaGameAiPlayer.prototype.getCondensedLPieceFor = function(fields, player) {
+  var a = fields[0];
+  var b = fields[1];
+  var c = fields[2];
+  var d = fields[3];
+  var isDiagonal = function(a, b) { // a, b instanceof V2d
+    return Math.abs(a.x - b.x) == 1 && Math.abs(a.y - b.y) == 1;
+  }
+  var isPair = function(a, b) {
+    return (a.x == b.x && Math.abs(a.y - b.y) == 1) ||
+      (a.y == b.y && Math.abs(a.x - b.x) == 1)
+  }
+  var piece = new LPiece(new V2d(), null, null, player);
+  var perms = [[a, b, c, d], [a, c, b, d], [a, d, b, c], [b, c, d, a], [b, d, a, c], [c, d, a, b]];
+  var x, y, longTailEnd, shortTailEnd, nr, p;
+  for (var i = 0; i < 6; ++i) {
+    p = perms[i];
+    if (isDiagonal(p[0], p[1])) {
+      nr = (isPair(p[2], p[0]) && isPair(p[2], p[1])) ? 2 : 3
+      x = p[nr].x
+      y = p[nr].y
+      longTailEnd = nr == 3 ? p[2] : p[3];
+      shortTailEnd = (isPair(longTailEnd, p[0])) ? p[1] : p[0];
+      break;
+    }
+  }
+  if (x == undefined) return false;
+  piece.pos.x = x;
+  piece.pos.y = y;
+  if (shortTailEnd.x == piece.pos.x) { // rot 0 or 2
+    if (shortTailEnd.y < piece.pos.y) {
+      piece.rot = 0;
+      piece.inv = longTailEnd.x < piece.pos.x;
+    } else {
+      piece.rot = 2;
+      piece.inv = longTailEnd.x > piece.pos.x;
+    }
+  } else { // rot 1 or 3
+    if (longTailEnd.y < piece.pos.y) {
+      piece.rot = 1;
+      piece.inv = shortTailEnd.x > piece.pos.x;
+    } else {
+      piece.rot = 3;
+      piece.inv = shortTailEnd.x < piece.pos.x;
+    }
+  }
+  return piece;
+};
+
+
+LaGameAiPlayer.prototype.drawGameBoard = function() {
+  this.gui.drawGameBoard();
+  var mp = this.movingPiece;
+  var pieces;
+  if (mp) {
+    if (mp instanceof NPiece) {
+      pieces = [this.logic.getNPieces()[makeOpposite(mp.nid)]].
+        concat(this.logic.getLPieces());
+      this.gui.setNeutral(mp, true);
+    } else {
+      pieces = [this.logic.getLPieces()[makeOpposite(this.playerNumber)]].
+        concat(this.logic.getNPieces());
+      this.gui.setLPiece(mp, true);
+    }
+    
+  } else {
+    pieces = this.logic.getNPieces().concat(this.logic.getLPieces());
+  }
+  var piece;
+  for (var p = 0; p < pieces.length; ++p) {
+    piece = pieces[p];
+    if (piece instanceof NPiece) {
+      this.gui.setNeutral(piece);
+    }
+    else {
+      this.gui.setLPiece(piece);
+    }
+  }
+  if (this.draggedFields != []) {
+    this.gui.setLFields(this.draggedFields, this.playerNumber);
+  }
+};
+
+
+/* AI stuff */
+
+LaGameAiPlayer.prototype.getAllPositions = function(field, player) {
+
+  var allPos = new Array()
+  var tempField = field.copy()
+  
+  var emptyLs = field.getEmptyLs(player, Infinity)
+  var emptyNs = 0
+  
+  for (var c1 = 0; c1 < emptyLs.length; c1++) {
+    tempField = field.copy()
+    tempField.lPieces[player] = this.getCondensedLPieceFor(emptyLs[c1], player)
+    
+    for (var nP = 0; nP < 2; nP++) {
+      console.log("np:" + nP)
+      emptyNs = tempField.getEmptyNs(nP)
+      for (var c2 = 0; c2 < emptyNs.length; c2++) {
+        tempField.nPieces[nP] = emptyNs[c2]
+        allPos.push(tempField.copy())
+      }
+    }
+  }
+
+  return allPos
+
+}
+

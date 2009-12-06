@@ -19,98 +19,35 @@
    - along with La Game.  If not, see <http://www.gnu.org/licenses/>. 
   -->
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <link rel="stylesheet" href="style.css" type="text/css">
-  <script type="text/javascript" src="lagame.tools.js"></script>
-  <script type="text/javascript" src="lagame.math.js"></script>
-  <script type="text/javascript" src="lagame.lpiece.js"></script>
-  <script type="text/javascript" src="lagame.npiece.js"></script>
-  <script type="text/javascript" src="lagame.field.js"></script>
-  <script type="text/javascript" src="lagame.gui.js"></script>
-  <script type="text/javascript" src="lagame.player.js"></script>
-  <script type="text/javascript" src="lagame.logic.js"></script>
+  <link rel="stylesheet" href="resources/style.css" type="text/css">
+  <script type="text/javascript" src="src/lagame.tools.js"></script>
+  <script type="text/javascript" src="src/lagame.math.js"></script>
+  <script type="text/javascript" src="src/lagame.lpiece.js"></script>
+  <script type="text/javascript" src="src/lagame.npiece.js"></script>
+  <script type="text/javascript" src="src/lagame.field.js"></script>
+  <script type="text/javascript" src="src/lagame.gui.js"></script>
+  <script type="text/javascript" src="src/lagame.player.js"></script>
+  <script type="text/javascript" src="src/lagame.ai-player.js"></script>
+  <script type="text/javascript" src="src/lagame.logic.js"></script>
   <script type="text/javascript">
-    window.onload = function() {
-    //return
-    mVect = new V2d(0,0)
-    inc = new V2d(1,0)
-    
-    var outp1 = "vect:\n"
-    
-    console.log(outp1)
-    
-    /*while (mVect.x != 3 || mVect.y != 3) {
-      console.log("i:" + mVect.y + "," + mVect.x + "\n")
-      mVect.fadd(inc)
-    }
-    
-    console.log("i:" + mVect.y + "," + mVect.x + "\n")
-    */
-
-    mField = new LaGameField()
-    
-    var mlStubs = mField.checkBarLs(mField.getOcc([ mField.lPieces[0], mField.nPieces[0], mField.nPieces[1] ]), new V2d(1,0), 100)
-    
-    if (mlStubs.length == 0) {
-      console.log("nomls")
-    }
-    
-    for (var d1 = 0; d1 < mlStubs; d1++) {
-      console.log("ml:" + mlStubs[d1].y + "," + mlStubs[d1].x)
-    }
-    /*
-    var hbars = "go"
-    var hbarsnum = 0
-    var startAt = new V2d(0,0)
-    
-    while (hbars != 0) {
-    
-    hbars = mField.findHBar(
-      [
-      [ 0,0,0,0 ],
-      [ 0,0,0,0 ],
-      [ 1,1,1,1 ],
-      [ 1,1,1,1 ]
-      ],
-      startAt)
-    startAt.fadd(inc)
-    if (hbars == 0) {
-      console.log("0")
-    }
-    else {
-      console.log("hb:" + hbars[0].y + "," + hbars[0].x)
-      startAt.y = hbars[1].y
-      startAt.x = hbars[1].x
-      hbarsnum++
-    }
-    
-    }
-    
-    console.log("hbarsnum:" + hbarsnum)
-    
-    return
-    */
-    emptyLs = mField.getEmptyLs(0, 100)
-    var outp = "el:" + emptyLs.length
-    for (var c1 = 0; c1 < emptyLs.length; c1++) {
-      outp += ("bar:"+emptyLs[c1].barStart.y+","+emptyLs[c1].barStart.x+"\nstub:"+emptyLs[c1].stub.y+","+emptyLs[c1].stub.x+"\n")
-    }
-    console.log("outp:" + outp)
-    }
-
-    /*function newGame() {
+    currentGame = null;
+    function newGame() {
+      if (currentGame) currentGame.stopGame();
+      
       var playerLabel = document.getElementById('currentPlayer');
       var nextPlayer = document.getElementById('nextPlayer');
       var canvas = document.getElementById('laGameCanvas');
       
       var gui = new LaGameGUI(canvas, playerLabel, nextPlayer);
-      var logic = new LaGameLogic(gui, LaGamePlayer, LaGamePlayer);
+      var logic = new LaGameLogic(gui, LaGameAiPlayer, LaGamePlayer);
+      currentGame = logic;
       
       gui.setPlayerLabel('Spieler 1 beginnt', 0);
       gui.setCanFinishTurn(false);
       
-      document.getElementById('nextPlayer').addEventListener('click', function() {
+      document.getElementById('nextPlayer').onclick = function() {
         logic.finishTurn();
-      }, false)
+      }
       
       logic.initializeGame();
     }
@@ -121,12 +58,19 @@
           newGame();
       }, false);
       newGame();
-    }*/
+    }
   </script>
   <title>La Game</title>
 </head>
 <body>
   <h1>La Game</h1>
+  <!--[if IE]>
+    <p id="ieComment">
+      Du benutzt einen nicht unterstützten, alten und unrespektierten Browser.<br>
+      Versuche den <a href="http://www.mozilla-europe.org/de/firefox/">Firefox Browser</a>
+      oder etwas anderes, vergleichbar qualitativ Hochwertiges.
+    </p>
+  <![endif]-->
   <p>
     Das <a href="http://www.edwdebono.com/debono/lgame.htm">L-Spiel</a>
     von <a href="http://www.edwdebono.com/">Edward de Bono</a> in JavaScript/Canvas.
@@ -141,15 +85,20 @@
     <input type="button" name="nextPlayer" value="Nächster Spieler" id="nextPlayer">
     <p id="gameInfo">
       <strong id="currentPlayer">Spieler 1 beginnt</strong>. Wähle die Steine per 
-      <code>Klick</code> aus, bewege sie mit den <code>Pfeiltasten</code> und platziere den Stein mit <code>Enter</code>.
-      Die <code>Leertaste</code> kannst du benutzen um Steine zu drehen.
-      Die Taste <code>B</code> dreht den Stein horizontal und <code>V</code> vertikal.
+      <code>Klick</code> aus. N-Steine kannst du wieder per Klick setzen und L-Steine
+      mit der Maus an der gewünschten Stelle ziehen. Solltest du dich
+      „verzogen“ haben, lass die Maus außerhalb deiner neuen Position los.
+      Wenn du den falschen N-Stein ausgesucht hast, 
+      kannst du deine Auswahl mit <code>ESC</code> ändern.
     </p>
   </fieldset>
   <p id="author">
     Shahriar M. Heidrich und Jannik Schürg (2009)<br>
     Quellcode auf <a href="http://github.com/jannschu/la_game">Github</a>
     zu finden, <a href="http://www.gnu.org/licenses/gpl.html">GPL Lizenz</a>.
+    <a id="gplLogo" href="http://www.fsf.org/">
+      <img src="resources/gplv3logo.png" width="88" height="31">
+    </a>
   </p>
 </body>
 </html>

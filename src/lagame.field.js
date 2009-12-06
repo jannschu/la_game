@@ -158,6 +158,30 @@ LaGameField.prototype.getOcc = function(candidates) {
 
 }
 
+LaGameField.prototype.getEmptyNs = function(excludeNid) {
+
+  var candidates = new Array( this.lPieces[0], this.lPieces[1] )
+  candidates.push(this.nPieces[makeOpposite(excludeNid)])
+  
+  var field = getOcc(candidates)
+  
+  var incr = new V2d(1,0)
+  
+  var curPos = new V2d(0,0)
+  
+  var emptyNs = new Array()
+  
+  while (curPos.y < 4 || curPos.x < 3) {
+    if (field[curPos.y][curPos.x] == 0) {
+      emptyNs.push(new NPiece(curPos.copy(), excludeNid))
+    }
+    curPos.fadd(incr)
+  }
+
+  return emptyNs
+
+}
+
 LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
 
   var candidates = new Array( this.lPieces[makeOpposite(excludeLid)] )
@@ -227,7 +251,7 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
         //console.log("checkingp: " + lCands[c1].y + "," + lCands[c1].x)
         if (!(this.lPieces[excludeLid].isSame(curBar.concat(lCands[c1]), rot))) {
           //console.log("p: bs:" + curBar[0].y + "," + curBar[0].x + " st:" + lCands[c1].y + "," + lCands[c1].x)
-          foundLs.push({stub:lCands[c1].condRot(rot),barStart:curBar[0].condRot(rot)})
+          foundLs.push(new Array(lCands[c1].condRot(rot),curBar[0].condRot(rot),curBar[1].condRot(rot),curBar[2].condRot(rot)))
           if (foundLs.length == stopAfter) {
             //console.log("fl1:" + foundLs.length)
             return foundLs
