@@ -81,6 +81,7 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
     console.log(outp)
   }
   
+  
   this.getAllPositions(allPos[7], 1)
   this.drawGameBoard()
   
@@ -97,7 +98,7 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   }
   
   console.log("ap:" + allPos.length)
-  this.drawAllPos(allPos, 0)
+  this.drawAllPos(ap, 0)
   
   this.logic.field = tempF
   
