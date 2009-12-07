@@ -23,7 +23,6 @@
  * ************************************************************************ */
 
 function LaGameField() {
-
   this.lPieces = [
     new LPiece(new V2d(0,2), 0, false, 0),
     new LPiece(new V2d(3,1), 2, false, 1)
@@ -138,36 +137,17 @@ LaGameField.prototype.getOccupiedField = function(pieces) {
 }
 
 LaGameField.prototype.getEmptyNs = function(excludeNid) {
-
   var candidates = [ this.lPieces[0], this.lPieces[1], this.nPieces[makeOpposite(excludeNid)] ]
   
   var field = this.getOccupiedField(candidates)
-  
-  var incr = new V2d(1,0)
-  
-  var curPos = new V2d(0,0)
-  
-  var emptyNs = new Array()
-  
-  
-  var firstOver = false
-  
-  var atEnd = false
-  
-  while (atEnd == false) {
-
-    if (field[curPos.y][curPos.x] == 0) {
-      emptyNs.push(new NPiece(curPos.copy(), excludeNid))
-    }
-    
-    curPos.addInBox(incr)
-    if (curPos.y == 0 && curPos.x == 0) {
-      atEnd = true
-    }
-
+  var emptyNs = [];
+  var incr = new V2d(1,0);
+  var end = new V2d(3, 3);
+  for(var pos = new V2d(0, 0); !pos.isEqual(end); pos.addInBox(incr)) {
+    if (field[pos.y][pos.x] == 0)
+      emptyNs.push(new NPiece(pos.copy(), excludeNid));
   }
-  return emptyNs
-
+  return emptyNs;
 }
 
 LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
