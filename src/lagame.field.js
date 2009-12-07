@@ -151,162 +151,73 @@ LaGameField.prototype.getEmptyNs = function(excludeNid) {
 }
 
 LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
-
-  var candidates = new Array( this.lPieces[makeOpposite(excludeLid)] )
-  candidates = candidates.concat(this.nPieces)
+  var pieces = [this.lPieces[makeOpposite(excludeLid)]].concat(this.nPieces);
+  var field = this.getOccupiedField(pieces);
+  var excludePiece = this.lPieces[excludeLid];
+  var player = excludePiece.player;
+  var emptyLs = [];
+  var rotated = false;
   
-  var field = this.getOccupiedField(candidates)
-
-  /* TODO: sth with rotation, checking for stopAfter == 0, ... dunno */
-  
-  /* TODO: improve efficiency by using an alternate method regarding
-   * rotation;
-   * suggestion: function like: fieldAccess(v1, v2, mode) where mode is either
-   * horizontal or vertical
-   */
-  
-  var incr = new V2d(1,0)
-  
-  /* Current position being checked */
-  var curPos = new V2d(0,0)
-  
-  /* L candidates which have to be checked for equality to the excluded one */
-  var lCands = new Array()
-  
-  /* Ls found so far */
-  var foundLs = new Array()
-  
-  /* Will store the current found bar's first piece */
-  var curBar = new V2d(0,0)
-  
-  for (var rot = 0; rot < 2; rot++) {
-    curPos = new V2d(0,0)
-    /* If it shalt be rotated, switch x and y positions */
-    if (rot == 1) {
-      var tempRot = field.copy();
-      for (var c1 = 0; c1 < 4; c1++) {
-        for (var c2 = 0; c2 < 4; c2++) {
-          field[c2][c1] = tempRot[c1][c2]
-        }
+  var rotateField = function() {
+    var newField = [[], [], [], []];
+    for (var x = 0; x < 4; ++x) {
+      for (var y = 0; y < 4; ++y) {
+        newField[x][y] = field[y][x];
       }
-      var outp = ""
-      for (var d1 = 0; d1 < 4; d1++) {
-        for (var d2 = 0; d2 < 4; d2++) {
-          outp += " " + field[d1][d2]
-        }
-        outp += "\n"
-      } //console.log(outp)
-    } /* End of rotation code */
-    
-    /* Actual shite starts here */
-    /* There can't be a bar anymore if it's at 4|2 */
-    var bFound = 0
-    while (curPos.y < 4 || curPos.x < 3) {
-      curBar = this.findHBar(field, curPos)
-      /* 0 on "no bars left" */
-      if (curBar == 0) {
-        break
-      }
-      
-      curPos.x = curBar[0].x
-      curPos.y = curBar[0].y
-      
-      lCands = this.checkBarLs(field, curBar[0], 5) /* 4! */
-      
-      //console.log("lclen:" + lCands.length)
-     
-      for (var c1 = 0; c1 < lCands.length; c1++) {
-        //console.log("checkingp: " + lCands[c1].y + "," + lCands[c1].x)
-        if (!(this.lPieces[excludeLid].hasTheFields(curBar.concat(lCands[c1]), rot))) {
-          //console.log("p: bs:" + curBar[0].y + "," + curBar[0].x + " st:" + lCands[c1].y + "," + lCands[c1].x)
-          foundLs.push([
-            lCands[c1].swapPointsIf(rot),
-            curBar[0].copy().swapPointsIf(rot),
-            curBar[1].copy().swapPointsIf(rot),
-            curBar[2].copy().swapPointsIf(rot)])
-          if (foundLs.length == stopAfter) {
-            //console.log("fl1:" + foundLs.length)
-            return foundLs
-          }
-        }
-      }
-      
-      curPos.addInBox(incr)
     }
-    
-  }
+    rotated = !rotated;
+    field = newField;
+  };
   
-  return foundLs
-
-}
-
-LaGameField.prototype.findHBar = function(occField, startAt) {
-
-  var startX = startAt.x
-  var startY = startAt.y
-    
-  var empty = new Array()
-  
-  /* Vertical loop */
-  for (var vC = startAt.y; vC < 4; vC++) {
-    
-    /* Reset empty once entering a new line since bars aren't multi-line */
-    empty = new Array()
-    
-    /* Horizontal loop */
-    for (var hC = startX; hC < 4; hC++) {
-    
-      if (occField[vC][hC] == 0) {
-        empty.push(new V2d(hC,vC))
-      }
-      else {
-        empty = new Array()
-      }
-      
-      if (empty.length == 3) {
-        return empty /* FIXME FIXED'AH! */
-      }
-      
-    
+  var generateLPieceFrom = function(pos, shortPos) {
+    var lPiece = new LPiece(pos, 0, false, player);
+    if (rotated) {
+      lPiece.rot = shortPos.y < 2 ? 3 : 1;
+      lPiece.inv = ((lPiece.rot == 3 && shortPos.x < pos.x) || 
+        (lPiece.rot == 1 && shortPos.x > pos.x));
+    } else {
+      pos.swapPoints();
+      shortPos.swapPoints();
+      lPiece.rot = shortPos.y > pos.y ? 2 : 0;
+      lPiece.inv = ((lPiece.rot == 0 && pos.x > 1) ||
+        (lPiece.rot == 2 && pos.x < 2));
     }
-    
-    /* Counts for the first time only; afterwards, continue in next line: 0 */
-    startX = 0
-    
-  }
+    console.log(pos.x, "|", pos.y, "rot", lPiece.rot, lPiece.inv)
+    if (!lPiece.isSame(excludePiece)) emptyLs.push(lPiece);
+  };
   
-  return 0
-
-}
-
-LaGameField.lStubs = [
-  new V2d(0,-1), new V2d(0,1),
-  new V2d(2,-1), new V2d(2,1)
-]
-
-LaGameField.prototype.checkBarLs = function(occField, barStart, stopAfter) {
-
-  lStubs = LaGameField.lStubs
-  var curPos = new V2d(0,0)
-  
-  var matchLStubs = new Array()
-  
-  for (var c1 = 0; c1 < lStubs.length; c1++) {
-    curPos = barStart.copy()
-    curPos.add(lStubs[c1])
-    if (curPos.isOutOfBox()) {
-      continue
-    }
-    
-    if (occField[curPos.y][curPos.x] == 0) {
-      matchLStubs.push(curPos)
-      if (matchLStubs.length == stopAfter) {
-        break
+  var addLPiecesFor = function(rowNr, row, conditions) {
+    var cond, startL, shortTail;
+    for (var i = 0; i < conditions.length; ++i) { cond = conditions[i];
+      if (cond instanceof Array) { // longTail to check
+        startL = cond[0]; shortTail = cond[1];
+        if (!row[startL] && !row[startL + 1] && !row[startL + 2])
+          generateLPieceFrom(new V2d(rowNr, shortTail), new V2d(rowNr - 1, shortTail));
+      } else { // shortTail to check
+        if (!row[cond])
+          generateLPieceFrom(new V2d(rowNr - 1, cond), new V2d(rowNr, cond));
       }
     }
   }
   
-  return matchLStubs
-
+  var findVerticalLPieces = function() {
+    var lRowCondition = [null, [], [], []];
+    var row, ni;
+    for (var i = 0; i < 4; ++i) { row = field[i]; ni = i + 1;
+      if (i > 0) addLPiecesFor(i, row, lRowCondition[i]);
+      if (i == 3) break;
+      if (!row[0]) lRowCondition[ni].push([0, 0]);
+      if (!row[1]) lRowCondition[ni].push([1, 1]);
+      if (!row[2]) lRowCondition[ni].push([0, 2]);
+      if (!row[3]) lRowCondition[ni].push([1, 3]);
+      if (!row[1] && !row[2]) {
+        if (!row[0]) lRowCondition[ni] = lRowCondition[ni].concat([0, 2]);
+        if (!row[3]) lRowCondition[ni] = lRowCondition[ni].concat([1, 3]);
+      }
+    }
+  };
+  findVerticalLPieces();
+  rotateField();
+  findVerticalLPieces();
+  return emptyLs;
 }
-

@@ -83,6 +83,10 @@ LPiece.prototype.realiseAndSwapPoints = function() {
   return tempfields
 }
 
+LPiece.prototype.isSame = function(rhs) {
+  return this.pos.isEqual(rhs.pos) && this.rot == rhs.rot && this.inv == rhs.inv;
+}
+
 /**
  * @param {V2d[]} fields The fields which should be checked
  * @param {Boolean} rot Shall the points be swapped?
