@@ -182,7 +182,6 @@ LaGameField.prototype.getEmptyLs = function(excludeLid, stopAfter) {
       lPiece.inv = ((lPiece.rot == 0 && pos.x > 1) ||
         (lPiece.rot == 2 && pos.x < 2));
     }
-    console.log(pos.x, "|", pos.y, "rot", lPiece.rot, lPiece.inv)
     if (!lPiece.isSame(excludePiece)) emptyLs.push(lPiece);
   };
   
