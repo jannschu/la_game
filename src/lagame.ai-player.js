@@ -100,58 +100,6 @@ LaGameAiPlayer.prototype.callEndCallback = function(newPiece) {
     window.setTimeout(function() { callback(newPiece) }, 0);
 };
 
-
-/* Duplicate code FTW */
-LaGameAiPlayer.prototype.getCondensedLPieceFor = function(fields, player) {
-  var a = fields[0];
-  var b = fields[1];
-  var c = fields[2];
-  var d = fields[3];
-  var isDiagonal = function(a, b) { // a, b instanceof V2d
-    return Math.abs(a.x - b.x) == 1 && Math.abs(a.y - b.y) == 1;
-  }
-  var isPair = function(a, b) {
-    return (a.x == b.x && Math.abs(a.y - b.y) == 1) ||
-      (a.y == b.y && Math.abs(a.x - b.x) == 1)
-  }
-  var piece = new LPiece(new V2d(), null, null, player);
-  var perms = [[a, b, c, d], [a, c, b, d], [a, d, b, c], [b, c, d, a], [b, d, a, c], [c, d, a, b]];
-  var x, y, longTailEnd, shortTailEnd, nr, p;
-  for (var i = 0; i < 6; ++i) {
-    p = perms[i];
-    if (isDiagonal(p[0], p[1])) {
-      nr = (isPair(p[2], p[0]) && isPair(p[2], p[1])) ? 2 : 3
-      x = p[nr].x
-      y = p[nr].y
-      longTailEnd = nr == 3 ? p[2] : p[3];
-      shortTailEnd = (isPair(longTailEnd, p[0])) ? p[1] : p[0];
-      break;
-    }
-  }
-  if (x == undefined) return false;
-  piece.pos.x = x;
-  piece.pos.y = y;
-  if (shortTailEnd.x == piece.pos.x) { // rot 0 or 2
-    if (shortTailEnd.y < piece.pos.y) {
-      piece.rot = 0;
-      piece.inv = longTailEnd.x < piece.pos.x;
-    } else {
-      piece.rot = 2;
-      piece.inv = longTailEnd.x > piece.pos.x;
-    }
-  } else { // rot 1 or 3
-    if (longTailEnd.y < piece.pos.y) {
-      piece.rot = 1;
-      piece.inv = shortTailEnd.x > piece.pos.x;
-    } else {
-      piece.rot = 3;
-      piece.inv = shortTailEnd.x < piece.pos.x;
-    }
-  }
-  return piece;
-};
-
-
 LaGameAiPlayer.prototype.drawGameBoard = function() {
   this.gui.drawGameBoard();
   
@@ -176,7 +124,7 @@ LaGameAiPlayer.prototype.getAllPositions = function(field, player) {
   var tempL
   
   for (var c1 = 0; c1 < emptyLs.length; c1++) {
-    tempL = this.getCondensedLPieceFor(emptyLs[c1], player)
+    tempL = emptyLs[c1]
     //console.log("curL:"+c1)
     for (var nP = 0; nP < 2; nP++) {
       tempField = field.copy()
