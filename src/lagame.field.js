@@ -45,21 +45,18 @@ LaGameField.prototype.copy = function() {
   return copy;
 };
 
-LaGameField.prototype.hashCode = function() {
+LaGameField.prototype.hashCode = function(playerPerspective) {
+  if (playerPerspective === undefined) playerPerspective = 0;
   // first make player one's l-piece have a vertical long tail
   var hashField = this.copy();
-  var refLPiece = hashField.lPieces[0];
+  var refLPiece = hashField.lPieces[playerPerspective];
   if (refLPiece.rot == 0 || refLPiece.rot == 2) hashField.rotateField();
   // now make the long tail show downwards
   if (refLPiece.rot == 1) hashField.inverseFieldVertically();
   // now make shure it is not horizontally inversed
   if (refLPiece.inv) hashField.inverseFieldHorizontally();
-  // if (refLPiece.inv != false || refLPiece.rot != 3) {
-  //   console.error("it's not right")
-  //   console.log(refLPiece)
-  // }
   var lPieceHash = function(piece) {
-    return "" + piece.pos.x + piece.pos.y + piece.rot + piece.inv ? "1" : "0" + piece.player
+    return "" + piece.rot + piece.pos.x + piece.pos.y + piece.player;
   };
   var nPieceHash = function(a, b) {
     var a = "" + a.pos.x + a.pos.y;
@@ -69,7 +66,7 @@ LaGameField.prototype.hashCode = function() {
   };
   var code = lPieceHash(hashField.lPieces[0]) + lPieceHash(hashField.lPieces[1]) +
     nPieceHash(hashField.nPieces[0], hashField.nPieces[1]);
-  return Number(code).toString(36);
+  return parseInt(code, 4);
 };
 
 LaGameField.prototype.inverseFieldHorizontally = function() {
