@@ -57,6 +57,7 @@
       switch (mode) {
         case "0": playerInput = [LaGamePlayer, LaGamePlayer]; break;
         case "1": playerInput = [LaGamePlayer, LaGameAiPlayer]; break;
+        case "2": playerInput = [LaGameAiPlayer, LaGameAiPlayer]; break;
       }
     }
     
@@ -95,6 +96,7 @@
     <select name="versusMode" id="versusMode">
       <option value="0">Mensch gegen Mensch</option>
       <option value="1">Mensch gegen Maschine</option>
+      <option value="2">Maschine gegen Maschine</option>
     </select>
     <input type="button" name="newGame" value="Neues Spiel" id="newGame">
     <input type="button" name="nextPlayer" value="Nächster Spieler" id="nextPlayer">

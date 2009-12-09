@@ -16,31 +16,16 @@
  * along with La Game.  If not, see <http://www.gnu.org/licenses/>. 
  */
 
-/*
- * THE PLAN:
-
-0.) increase count variable
-1.) get all possible L and N positions
-2.) map those to L pieces
-3.) create hash and store it somewhere
-4.) compare this hash to any hashes so far; if it's equal, stop the current
-    branch of execution
-5.) if the situation means win, return "win"
-6.) if the situation means fail, return "fail"
-
- * :NALP EHT
- */
-
 function LaGameAiPlayer(playerNumber, gui, logic) {
-
+  
   this.playerNumber = playerNumber; // public
   this.gui = gui; // public
   this.logic = logic; // public
-
+  
   this.canMoveL = false; // public
   this.canMoveNeutral = false; // public
   this.endMoveCallback = null;
-
+  
 }
 
 LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
@@ -53,45 +38,87 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   this.canMoveL = !!l;
   this.canMoveNeutral = !!neutral;
   this.endMoveCallback = callback;
-  var oldField = this.logic.field;
   
-  var hasOptimal = false
+  var move = this.getBestMove();
   
-  var allPos = this.getAllPositions(this.logic.field, this.playerNumber);
-
-  for (var c1 = 0; c1 < allPos.length; c1++) {
-    if (allPos[c1].getEmptyLs(makeOpposite(this.playerNumber), 1).length == 0) {
-      this.logic.field = allPos[c1]
-      hasOptimal = true
-    }
-  }
-  
-  if (!hasOptimal) {
-    this.logic.field = allPos[Math.round((allPos.length - 1) * Math.random())]
-  }
   var logic = this.logic;
-  this.gui.animateMove(oldField, logic.field, function() {
+  
+  this.gui.animateMove(logic.field, move, function() {
     logic.playerCanMoveN = true
     logic.playerCanMoveL = true
+    logic.field = move;
     setTimeout(function() {logic.switchPlayers()}, 0);
   })
 }
 
-LaGameAiPlayer.prototype.drawAllPos = function(allPos, curNum) {
-  if (curNum == allPos.length) {
-    return
-  }
-  this.logic.field = allPos[curNum]
-  var me = this
-  this.drawGameBoard()
-  curNum++
-  window.setTimeout(function() { me.drawAllPos(allPos, curNum) },50)
-  
-}
-
-
 LaGameAiPlayer.prototype.stopMoving = function(notRedraw) {
   if (!notRedraw) this.drawGameBoard();
+};
+
+LaGameAiPlayer.prototype.getBestMove = function() {
+  var startField = this.logic.field.copy();
+  
+  var getMyMoves = this.getMovesFor(startField, this.playerNumber);
+  var oppPlayer = makeOpposite(this.playerNumber);
+  
+  var myMoves;
+  var last;
+  var notLoseMoves = [];
+  while(myMoves = getMyMoves()) {
+    var myMove;
+    for (var i = 0; i < myMoves.length; ++i) { myMove = myMoves[i];
+      last = myMove;
+      if (myMove.getEmptyLs(oppPlayer).length == 0) return myMove;
+      var getOppPlayerMoves = this.getMovesFor(myMove, oppPlayer);
+      var oppMoves, oppMove;
+      var lost = false;
+      while (oppMoves = getOppPlayerMoves()) {
+        for (var j = 0; j < oppMoves.length; ++j) { oppMove = oppMoves[j];
+          if (oppMove.getEmptyLs(this.playerNumber).length == 0) {
+            lost = true; break;
+          }
+        }
+        if (lost) break;
+      }
+      if (!lost) notLoseMoves.push(myMove);
+    }
+  }
+  if (!last) return startField;
+  var rand = function() {
+    return Math.round((notLoseMoves.length - 1) * Math.random());
+  }
+  return notLoseMoves.length > 0 ? notLoseMoves[rand()] : last;
+};
+
+LaGameAiPlayer.prototype.getMovesFor = function(field, player) {
+  var currentPlayer = player;
+  var emptyLs = field.getEmptyLs(currentPlayer);
+  var moves = [];
+  var current = 0;
+  var end = emptyLs.length;
+  return function() {
+    if (current == end) {
+      // if (arg == "res") current = 0;
+      // else return false;
+      delete emptyLs;
+      return false;
+    }
+    // console.log(current, end)
+    var moves = []
+    var lField = field.copy();
+    lField.lPieces[currentPlayer] = emptyLs[current];
+    var emptyNs = lField.getEmptyNs(0).concat(lField.getEmptyNs(1));
+    var half = emptyNs.length / 2;
+    var retField;
+    for (j = 0; j < emptyNs.length; ++j) {
+      retField = lField.copy();
+      retField.nPieces[j < half ? 0 : 1] = emptyNs[j];
+      moves.push(retField);
+    }
+    delete lField, emptyNs, retField;
+    ++current;
+    return moves;
+  }
 };
 
 LaGameAiPlayer.prototype.callEndCallback = function(newPiece) {
@@ -99,46 +126,3 @@ LaGameAiPlayer.prototype.callEndCallback = function(newPiece) {
   if (callback)
     window.setTimeout(function() { callback(newPiece) }, 0);
 };
-
-LaGameAiPlayer.prototype.drawGameBoard = function() {
-  this.gui.drawGameBoard();
-  
-  this.gui.setLPiece(this.logic.field.lPieces[0])
-  this.gui.setLPiece(this.logic.field.lPieces[1])
-  this.gui.setNPiece(this.logic.field.nPieces[0])
-  this.gui.setNPiece(this.logic.field.nPieces[1])
-  
-};
-
-
-/* AI stuff */
-
-LaGameAiPlayer.prototype.getAllPositions = function(field, player) {
-
-  var allPos = new Array()
-  var tempField = field.copy()
-  
-  var emptyLs = field.getEmptyLs(player, Infinity)
-  var emptyNs = 0
-  
-  var tempL
-  
-  for (var c1 = 0; c1 < emptyLs.length; c1++) {
-    tempL = emptyLs[c1]
-    //console.log("curL:"+c1)
-    for (var nP = 0; nP < 2; nP++) {
-      tempField = field.copy()
-      //console.log("nP:"+nP)
-      tempField.lPieces[player] = tempL
-      emptyNs = tempField.getEmptyNs(nP)
-      for (var c2 = 0; c2 < emptyNs.length; c2++) {
-        tempField.nPieces[nP] = emptyNs[c2]
-        allPos.push(tempField.copy())
-      }
-    }
-  }
-
-  return allPos
-
-}
-
