@@ -202,10 +202,11 @@ LaGameGUI.prototype.animateMove = function(oldField, newField, callback) {
     gui.unsetLPiece(oldL);
     gui.setLPiece(oldL, true);
     var fields = sortFieldsAsIfDragged(newL.realise());
-    setTimeout(function() { gui.setLFields(fields.slice(0, 1))}, 300);
-    setTimeout(function() { gui.setLFields(fields.slice(0, 2))}, 600);
-    setTimeout(function() { gui.setLFields(fields.slice(0, 3))}, 900);
-    setTimeout(function() { gui.setLFields(fields.slice(0, 4))}, 1200);
+    var player = newL.player;
+    setTimeout(function() { gui.setLFields(fields.slice(0, 1), player)}, 300);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 2), player)}, 600);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 3), player)}, 900);
+    setTimeout(function() { gui.setLFields(fields.slice(0, 4), player)}, 1200);
     setTimeout(function() {
       gui.unsetLPiece(oldL);
       gui.setLPiece(newL);
