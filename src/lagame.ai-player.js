@@ -36,7 +36,7 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   if (l && !neutral) this.bestMove = this.getBestMove();
   
   this.endMoveCallback = callback;
-  
+  console.log("called")
   var move;
   var moveField = this.logic.field.copy();
   if (l) {

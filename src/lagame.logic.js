@@ -61,6 +61,7 @@ function LaGameLogic(gui, playerA, playerB) {
 
 LaGameLogic.prototype.stopGame = function() {
   this.players[this.curPlayer].stopMoving();
+  this.isEnded = true;
 };
 
 LaGameLogic.prototype.getLPieces = function() {
@@ -129,7 +130,7 @@ LaGameLogic.prototype.isValidMove = function(move, cachedRealMove)
  * @param {MoveObject} move Move to attempt to do
  */
 LaGameLogic.prototype.doMove = function(move) {
-
+  if (this.isEnded) return;
   /* Check if player can execute the move (simple conditions) */
   
   /* L pieces */
@@ -340,7 +341,7 @@ LaGameLogic.prototype.checkCollisions = function(move, fields) {
  * Just sayin'.
  */
 LaGameLogic.prototype.switchPlayers = function() {
-
+  if (this.isEnded) return;
   /*
    * FIXME: ADD ERRCHECK HERE (e.g. if player hasn't moved L piece yet -> fail
    *
