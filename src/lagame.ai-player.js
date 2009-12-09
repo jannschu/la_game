@@ -22,38 +22,40 @@ function LaGameAiPlayer(playerNumber, gui, logic) {
   this.gui = gui; // public
   this.logic = logic; // public
   
-  this.canMoveL = false; // public
-  this.canMoveNeutral = false; // public
   this.endMoveCallback = null;
   
+  this.bestMove = null;
 }
 
 LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
 
   if (this.gui.getCurrentPlayerForLabel() != this.playerNumber) 
     this.gui.setPlayerLabel("Spieler " + (this.playerNumber + 1) + " (KI) ist dran",
-      this.playerNumber
-    )
-
-  this.canMoveL = !!l;
-  this.canMoveNeutral = !!neutral;
+      this.playerNumber);
+  
+  if (l && !neutral) this.bestMove = this.getBestMove();
+  
   this.endMoveCallback = callback;
   
-  var move = this.getBestMove();
+  var move;
+  var moveField = this.logic.field.copy();
+  if (l) {
+    move = this.bestMove.lPieces[this.playerNumber];
+    moveField.lPieces[this.playerNumber] = move;
+  }
+  else {
+    var i = this.bestMove.nPieces[0].isSame(this.logic.field.nPieces[0]) ? 1 : 0;
+    move = this.bestMove.nPieces[i];
+    moveField.nPieces[i] = move;
+  }
   
-  var logic = this.logic;
-  
-  this.gui.animateMove(logic.field, move, function() {
-    logic.playerCanMoveN = true
-    logic.playerCanMoveL = true
-    logic.field = move;
-    setTimeout(function() {logic.switchPlayers()}, 0);
+  var player = this;
+  this.gui.animateMove(this.logic.field, moveField, function() {
+    player.callEndCallback(move);
   })
 }
 
-LaGameAiPlayer.prototype.stopMoving = function(notRedraw) {
-  if (!notRedraw) this.drawGameBoard();
-};
+LaGameAiPlayer.prototype.stopMoving = function() {};
 
 LaGameAiPlayer.prototype.getBestMove = function() {
   var startField = this.logic.field.copy();

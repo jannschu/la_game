@@ -32,7 +32,11 @@
   <script type="text/javascript">
     currentGame = null;
     function newGame() {
-      if (currentGame) currentGame.stopGame();
+      if (currentGame) {
+        currentGame.gui.canvas = document.createElement("canvas");
+        currentGame.stopGame();
+      }
+      
       updateGameMode();
       var playerLabel = document.getElementById('currentPlayer');
       var nextPlayer = document.getElementById('nextPlayer');
