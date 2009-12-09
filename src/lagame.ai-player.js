@@ -46,6 +46,10 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   else {
     var i = this.bestMove.nPieces[0].isSame(this.logic.field.nPieces[0]) ? 1 : 0;
     move = this.bestMove.nPieces[i];
+    if (move.isSame(moveField.nPieces[i])) {
+      this.callEndCallback(move);
+      return;
+    }
     moveField.nPieces[i] = move;
   }
   
