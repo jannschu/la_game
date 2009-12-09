@@ -28,35 +28,36 @@ function LaGameAiPlayer(playerNumber, gui, logic) {
 }
 
 LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
-
   if (this.gui.getCurrentPlayerForLabel() != this.playerNumber) 
     this.gui.setPlayerLabel("Spieler " + (this.playerNumber + 1) + " (KI) ist dran",
       this.playerNumber);
-  
-  if (l && !neutral) this.bestMove = this.getBestMove();
-  
-  this.endMoveCallback = callback;
-  
-  var move;
-  var moveField = this.logic.field.copy();
-  if (l) {
-    move = this.bestMove.lPieces[this.playerNumber];
-    moveField.lPieces[this.playerNumber] = move;
-  }
-  else {
-    var i = this.bestMove.nPieces[0].isSame(this.logic.field.nPieces[0]) ? 1 : 0;
-    move = this.bestMove.nPieces[i];
-    if (move.isSame(moveField.nPieces[i])) {
-      this.callEndCallback(move);
-      return;
-    }
-    moveField.nPieces[i] = move;
-  }
-  
   var player = this;
-  this.gui.animateMove(this.logic.field, moveField, function() {
-    player.callEndCallback(move);
-  })
+  setTimeout(function() {
+    if (l && !neutral) player.bestMove = player.getBestMove();
+    
+    player.endMoveCallback = callback;
+    
+    var move;
+    var moveField = player.logic.field.copy();
+    if (l) {
+      move = player.bestMove.lPieces[player.playerNumber];
+      moveField.lPieces[player.playerNumber] = move;
+    }
+    else {
+      var i = player.bestMove.nPieces[0].isSame(player.logic.field.nPieces[0]) ? 1 : 0;
+      move = player.bestMove.nPieces[i];
+      if (move.isSame(moveField.nPieces[i])) {
+        player.callEndCallback(move);
+        return;
+      }
+      moveField.nPieces[i] = move;
+    }
+    
+    player.gui.animateMove(player.logic.field, moveField, function() {
+      player.callEndCallback(move);
+    })
+  }, 0);
+  
 }
 
 LaGameAiPlayer.prototype.stopMoving = function() {};

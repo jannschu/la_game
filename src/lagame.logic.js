@@ -150,7 +150,7 @@ LaGameLogic.prototype.doMove = function(move) {
       return { error:"lnotmovedyet" }
     }
   }
-
+  
   var result
   
   result = this.isValidMove(move)
@@ -180,7 +180,6 @@ LaGameLogic.prototype.doMove = function(move) {
   }
   
   return { error:"none" }
-  
 }
 
 LaGameLogic.prototype.registerCallback = function() {
