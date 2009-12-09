@@ -238,7 +238,7 @@ LaGameGUI.prototype.animateMove = function(oldField, newField, callback) {
       if (!isSameLPiecePosition(oldPiece, newPiece))
         timeout = moveLPiece(oldPiece, newPiece);
     }
-    setTimeout(animatePieces, timeout + 300);
+    setTimeout(animatePieces, timeout + 50);
   }
   animatePieces();
 };
