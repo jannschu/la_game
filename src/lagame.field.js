@@ -55,8 +55,9 @@ LaGameField.prototype.hashCode = function(playerPerspective) {
   if (refLPiece.rot == 1) hashField.inverseFieldVertically();
   // now make shure it is not horizontally inversed
   if (refLPiece.inv) hashField.inverseFieldHorizontally();
+  
   var lPieceHash = function(piece) {
-    return "" + piece.rot + piece.pos.x + piece.pos.y + piece.player;
+    return "" + piece.rot + piece.pos.x + piece.pos.y + (piece.inv ? 1 : 0);
   };
   var nPieceHash = function(a, b) {
     var a = "" + a.pos.x + a.pos.y;
@@ -64,7 +65,8 @@ LaGameField.prototype.hashCode = function(playerPerspective) {
     if (Number(a) < Number(b)) return a + b;
     else return b + a;
   };
-  var code = lPieceHash(hashField.lPieces[0]) + lPieceHash(hashField.lPieces[1]) +
+  var code = lPieceHash(hashField.lPieces[playerPerspective]) + 
+    lPieceHash(hashField.lPieces[makeOpposite(playerPerspective)]) +
     nPieceHash(hashField.nPieces[0], hashField.nPieces[1]);
   return parseInt(code, 4);
 };
@@ -104,13 +106,13 @@ LaGameField.prototype.rotateField = function() {
     var x0 = l.pos.x;
     l.pos.x = l.pos.y;
     l.pos.y = 3 - x0;
-    if (++l.rot == 4) l.rot = 0;
+    l.rot = Math.abs(l.inv ? l.rot + 3 : l.rot + 1) % 4;
     return l;
   };
-  this.nPieces[0] = rotateNPiece(this.nPieces[0]);
-  this.nPieces[1] = rotateNPiece(this.nPieces[1]);
-  this.lPieces[0] = rotateLPiece(this.lPieces[0]);
-  this.lPieces[1] = rotateLPiece(this.lPieces[1]);
+  rotateNPiece(this.nPieces[0]);
+  rotateNPiece(this.nPieces[1]);
+  rotateLPiece(this.lPieces[0]);
+  rotateLPiece(this.lPieces[1]);
 };
 
 /**

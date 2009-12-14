@@ -52,12 +52,10 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
       }
       moveField.nPieces[i] = move;
     }
-    
     player.gui.animateMove(player.logic.field, moveField, function() {
       player.callEndCallback(move);
     })
   }, 0);
-  
 }
 
 LaGameAiPlayer.prototype.stopMoving = function() {};
@@ -71,17 +69,27 @@ LaGameAiPlayer.prototype.getBestMove = function() {
   var myMoves;
   var last;
   var notLoseMoves = [];
+  var bestWinMove, bestLoseMove, winMoveCount = Infinity, loseMoveCount = 0, c;
   while(myMoves = getMyMoves()) {
     var myMove;
     for (var i = 0; i < myMoves.length; ++i) { myMove = myMoves[i];
       last = myMove;
       if (myMove.getEmptyLs(oppPlayer).length == 0) return myMove;
+      if ((c = this.isLosingPosition(myMove, oppPlayer)) && c < winMoveCount) {
+        winMoveCount = c;
+        bestWinMove = myMove;
+      }
       var getOppPlayerMoves = this.getMovesFor(myMove, oppPlayer);
-      var oppMoves, oppMove;
+      var oppMoves, oppMove, possibleMoves;
       var lost = false;
       while (oppMoves = getOppPlayerMoves()) {
-        for (var j = 0; j < oppMoves.length; ++j) { oppMove = oppMoves[j];
-          if (oppMove.getEmptyLs(this.playerNumber).length == 0) {
+        for (var j = 0; j < oppMoves.length; ++j) { oppMove = oppMoves[j]; c = false;
+          possibleMoves = oppMove.getEmptyLs(this.playerNumber).length
+          if (possibleMoves == 0 || (c = this.isLosingPosition(oppMove))) {
+            if (c && c > loseMoveCount) {
+              loseMoveCount = c;
+              bestLoseMove = myMove;
+            }
             lost = true; break;
           }
         }
@@ -90,11 +98,29 @@ LaGameAiPlayer.prototype.getBestMove = function() {
       if (!lost) notLoseMoves.push(myMove);
     }
   }
-  if (!last) return startField;
-  var rand = function() {
-    return Math.round((notLoseMoves.length - 1) * Math.random());
+  if (!last) return startField; // already lost :-(
+  if (bestWinMove) {
+    return bestWinMove;
+  } else if (notLoseMoves.length > 0) {
+    return notLoseMoves[Math.round((notLoseMoves.length - 1) * Math.random())];
+  } else return (bestLoseMove ? bestLoseMove : last)
+};
+
+LaGameAiPlayer.losingPositions = [
+  [12621112, 12621179, 14733758], [12621180, 12621182, 12871751], 
+  [12621116, 12621118, 12609591, 12621115, 12621111], 
+  [12621246, 12902766, 12902767]
+]
+count = 0;
+LaGameAiPlayer.prototype.isLosingPosition = function(field, forPlayer) {
+  if (forPlayer === undefined) forPlayer = this.playerNumber;
+  var fieldHash = field.hashCode(forPlayer);
+  for (var i = 0; i < LaGameAiPlayer.losingPositions.length; ++i) {
+    for (var j = 0; j < LaGameAiPlayer.losingPositions[i].length; ++j) {
+      if (fieldHash == LaGameAiPlayer.losingPositions[i][j]) return i + 1;
+    }
   }
-  return notLoseMoves.length > 0 ? notLoseMoves[rand()] : last;
+  return false;
 };
 
 LaGameAiPlayer.prototype.getMovesFor = function(field, player) {
@@ -105,12 +131,9 @@ LaGameAiPlayer.prototype.getMovesFor = function(field, player) {
   var end = emptyLs.length;
   return function() {
     if (current == end) {
-      // if (arg == "res") current = 0;
-      // else return false;
       delete emptyLs;
       return false;
     }
-    // console.log(current, end)
     var moves = []
     var lField = field.copy();
     lField.lPieces[currentPlayer] = emptyLs[current];
