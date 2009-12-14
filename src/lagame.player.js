@@ -184,6 +184,8 @@ LaGamePlayer.prototype.stopDragging = function(e) {
   
   if (this.movingPiece instanceof NPiece) {
     var pos = this.mousePosToCanvasPosition(e);
+    var other = this.logic.getNPieces();
+    if (other[0].pos.isEqual(pos) || other[1].pos.isEqual(pos)) return;
     this.movingPiece.pos.x = pos.x;
     this.movingPiece.pos.y = pos.y;
     this.callEndCallback(this.movingPiece);
