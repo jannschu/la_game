@@ -39,14 +39,16 @@
       
       updateGameMode();
       var playerLabel = document.getElementById('currentPlayer');
+      var moveStats = document.getElementById('moveStats');
       var nextPlayer = document.getElementById('nextPlayer');
       var canvas = document.getElementById('laGameCanvas');
       
-      var gui = new LaGameGUI(canvas, playerLabel, nextPlayer);
+      var gui = new LaGameGUI(canvas, playerLabel, nextPlayer, moveStats);
       var logic = new LaGameLogic(gui, playerInput[0], playerInput[1]);
       currentGame = logic;
       
       gui.setPlayerLabel('Spieler 1 beginnt', 0);
+      gui.updateMoveStat();
       gui.setCanFinishTurn(false);
       
       document.getElementById('nextPlayer').onclick = function() {
@@ -111,6 +113,9 @@
       „verzogen“ haben, lass die Maus außerhalb deiner neuen Position los.
       Wenn du den falschen N-Stein ausgesucht hast, 
       kannst du deine Auswahl mit <code>ESC</code> ändern.
+    </p>
+    <p>
+      <code id="moveStats">Das Spiel hatte bis jetzt <strong>0</strong> Züge</code>
     </p>
   </fieldset>
   <p id="author">

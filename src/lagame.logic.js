@@ -351,7 +351,7 @@ LaGameLogic.prototype.switchPlayers = function() {
    * was ) just before calling this function; that solves it. No extra 
    * checking of any kind necessary.
    */
-  
+  this.gui.setMoveCounter(this.gui.moveCounter + 1);
   if (this.curPlayer == 0) {
     this.curPlayer = 1
   }

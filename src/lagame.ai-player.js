@@ -31,9 +31,13 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
   if (this.gui.getCurrentPlayerForLabel() != this.playerNumber) 
     this.gui.setPlayerLabel("Spieler " + (this.playerNumber + 1) + " (KI) ist dran",
       this.playerNumber);
+  this.movesLeft = false;
   var player = this;
   setTimeout(function() {
-    if (l && !neutral) player.bestMove = player.getBestMove();
+    if (l && !neutral) {
+      player.bestMove = player.getBestMove();
+      player.gui.setMovesLeft(player.movesLeft);
+    }
     
     player.endMoveCallback = callback;
     
@@ -54,7 +58,7 @@ LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
     }
     player.gui.animateMove(player.logic.field, moveField, function() {
       player.callEndCallback(move);
-    })
+    });
   }, 0);
 }
 
@@ -100,6 +104,7 @@ LaGameAiPlayer.prototype.getBestMove = function() {
   }
   if (!last) return startField; // already lost :-(
   if (bestWinMove) {
+    this.movesLeft = winMoveCount;
     return bestWinMove;
   } else if (notLoseMoves.length > 0) {
     return notLoseMoves[Math.round((notLoseMoves.length - 1) * Math.random())];

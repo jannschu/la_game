@@ -22,11 +22,14 @@
  * @param {HTMLCanvasElement} canvas
  * @constructor
  */
-function LaGameGUI(canvas, playerLabel, nextPlayerButton) {
+function LaGameGUI(canvas, playerLabel, nextPlayerButton, moveStats) {
   this.canvas = canvas;
   this.playerLabel = playerLabel;
   this.currentPlayer = null;
   this.nextPlayerButton = nextPlayerButton;
+  this.moveStats = moveStats;
+  this.moveCounter = 0;
+  this.movesLeft = false;
   this.border = 4;
   
   if (canvas.width != canvas.height) alert('Canvas should be quadratic');
@@ -35,6 +38,26 @@ function LaGameGUI(canvas, playerLabel, nextPlayerButton) {
   this.fieldSize = (this.boardSize - 5 * this.border) / 4; // public
 
   this.lColor = ['red', 'blue', 'white'];
+};
+
+LaGameGUI.prototype.setMoveCounter = function(counter) {
+  this.moveCounter = counter;
+  this.updateMoveStat();
+};
+
+LaGameGUI.prototype.setMovesLeft = function(leftMoves) {
+  this.movesLeft = leftMoves;
+  this.updateMoveStat();
+};
+
+LaGameGUI.prototype.updateMoveStat = function() {
+  var count = this.moveCounter;
+  var str = "Das Spiel hatte bis jetzt <strong>" + count + "</strong> " +
+    (count == 1 ? "Zug" : "Züge");
+  this.moveStats.innerHTML = str;
+  if (this.movesLeft !== false) {
+    this.moveStats.innerHTML += " (Maximal <strong>" + this.movesLeft + "</strong> noch)";
+  }
 };
 
 LaGameGUI.prototype.setPlayerLabel = function(text, player) {
