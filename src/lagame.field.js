@@ -135,8 +135,8 @@ LaGameField.prototype.getOccupiedField = function(pieces) {
   return field
 }
 
-LaGameField.prototype.getEmptyNs = function(excludeNid) {
-  var candidates = [ this.lPieces[0], this.lPieces[1], this.nPieces[makeOpposite(excludeNid)] ]
+LaGameField.prototype.getEmptyNs = function() {
+  var candidates = [ this.lPieces[0], this.lPieces[1], this.nPieces[0], this.nPieces[1]]
   
   var field = this.getOccupiedField(candidates)
   var emptyNs = [];
@@ -144,7 +144,7 @@ LaGameField.prototype.getEmptyNs = function(excludeNid) {
   var end = new V2d(3, 3);
   for(var pos = new V2d(0, 0); !pos.isEqual(end); pos.addInBox(incr)) {
     if (field[pos.y][pos.x] == 0)
-      emptyNs.push(new NPiece(pos.copy(), excludeNid));
+      emptyNs.push(pos.copy());
   }
   return emptyNs;
 }

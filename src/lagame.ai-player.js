@@ -87,7 +87,7 @@ LaGameAiPlayer.prototype.getBestMove = function() {
       var oppMoves, oppMove, possibleMoves;
       var lost = false;
       while (oppMoves = getOppPlayerMoves()) {
-        for (var j = 0; j < oppMoves.length; ++j) { oppMove = oppMoves[j]; c = false;
+        for (var j = 0; j < oppMoves.length; ++j) { oppMove = oppMoves[j];
           possibleMoves = oppMove.getEmptyLs(this.playerNumber).length
           if (possibleMoves == 0 || (c = this.isLosingPosition(oppMove))) {
             if (c && c > loseMoveCount) {
@@ -108,15 +108,15 @@ LaGameAiPlayer.prototype.getBestMove = function() {
     return bestWinMove;
   } else if (notLoseMoves.length > 0) {
     return notLoseMoves[Math.round((notLoseMoves.length - 1) * Math.random())];
-  } else return (bestLoseMove ? bestLoseMove : last)
+  } else return (bestLoseMove ? bestLoseMove : last);
 };
 
 LaGameAiPlayer.losingPositions = [
-  [12621112, 12621179, 14733758], [12621180, 12621182, 12871751], 
-  [12621116, 12621118, 12609591, 12621115, 12621111], 
+  [12621112, 12621179, 14733758], [12621180, 12621182, 12871751],
+  [12621116, 12621118, 12609591, 12621115, 12621111],
   [12621246, 12902766, 12902767]
 ]
-count = 0;
+
 LaGameAiPlayer.prototype.isLosingPosition = function(field, forPlayer) {
   if (forPlayer === undefined) forPlayer = this.playerNumber;
   var fieldHash = field.hashCode(forPlayer);
@@ -131,26 +131,24 @@ LaGameAiPlayer.prototype.isLosingPosition = function(field, forPlayer) {
 LaGameAiPlayer.prototype.getMovesFor = function(field, player) {
   var currentPlayer = player;
   var emptyLs = field.getEmptyLs(currentPlayer);
-  var moves = [];
   var current = 0;
   var end = emptyLs.length;
   return function() {
-    if (current == end) {
-      delete emptyLs;
-      return false;
-    }
+    if (current == end) return false;
     var moves = []
     var lField = field.copy();
     lField.lPieces[currentPlayer] = emptyLs[current];
-    var emptyNs = lField.getEmptyNs(0).concat(lField.getEmptyNs(1));
-    var half = emptyNs.length / 2;
+    moves.push(lField)
+    var emptyNs = lField.getEmptyNs();
     var retField;
     for (j = 0; j < emptyNs.length; ++j) {
       retField = lField.copy();
-      retField.nPieces[j < half ? 0 : 1] = emptyNs[j];
+      retField.nPieces[0] = new NPiece(emptyNs[j], retField.nPieces[0].nid);
+      moves.push(retField);
+      retField = lField.copy();
+      retField.nPieces[1] = new NPiece(emptyNs[j].copy(), retField.nPieces[1].nid);
       moves.push(retField);
     }
-    delete lField, emptyNs, retField;
     ++current;
     return moves;
   }
