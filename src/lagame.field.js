@@ -126,8 +126,13 @@ LaGameField.prototype.getOccupiedField = function(pieces) {
   for (var i = 0; i < pieces.length; ++i)
     realisedFields = realisedFields.concat(pieces[i].realise())
   
-  for (var i = 0; i < realisedFields.length; ++i)
-    field[realisedFields[i].y][realisedFields[i].x] = 1
+  var pos;
+  for (var i = 0; i < realisedFields.length; ++i) {
+    pos = realisedFields[i];
+    if (!pos) continue;
+    if (pos.x >= 0 && pos.x < 4 && pos.y >= 0 && pos.y < 4)
+      field[pos.y][realisedFields[i].x] = 1
+  }
   
   // var outp = ""
   // for(var d = 0; d < field.length; ++d) outp += field[d].join("") + "\n";
@@ -142,9 +147,10 @@ LaGameField.prototype.getEmptyNs = function() {
   var emptyNs = [];
   var incr = new V2d(1,0);
   var end = new V2d(3, 3);
-  for(var pos = new V2d(0, 0); !pos.isEqual(end); pos.addInBox(incr)) {
+  for(var pos = new V2d(0, 0);; pos.addInBox(incr)) {
     if (field[pos.y][pos.x] == 0)
       emptyNs.push(pos.copy());
+    if (pos.isEqual(end)) break;
   }
   return emptyNs;
 }
