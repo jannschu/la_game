@@ -87,7 +87,7 @@ LaGameAiPlayer.prototype.getBestMove = function() {
       var oppMoves, oppMove, possibleMoves;
       var lost = false;
       while (oppMoves = getOppPlayerMoves()) {
-        for (var j = 0; j < oppMoves.length; ++j) { oppMove = oppMoves[j];
+        for (var j = 0; j < oppMoves.length; ++j) { oppMove = oppMoves[j]; c = false;
           possibleMoves = oppMove.getEmptyLs(this.playerNumber).length
           if (possibleMoves == 0 || (c = this.isLosingPosition(oppMove))) {
             if (c && c > loseMoveCount) {
@@ -107,7 +107,16 @@ LaGameAiPlayer.prototype.getBestMove = function() {
     this.movesLeft = winMoveCount;
     return bestWinMove;
   } else if (notLoseMoves.length > 0) {
-    return notLoseMoves[Math.round((notLoseMoves.length - 1) * Math.random())];
+    var min = Infinity;
+    var move, c;
+    for (var i = 0; i < notLoseMoves.length; ++i) {
+      c = notLoseMoves[i].getEmptyLs(oppPlayer).length;
+      if (c < min) {
+        min = c;
+        move = notLoseMoves[i];
+      }
+      return move;
+    }
   } else return (bestLoseMove ? bestLoseMove : last);
 };
 
