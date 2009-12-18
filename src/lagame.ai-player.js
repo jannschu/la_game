@@ -115,8 +115,8 @@ LaGameAiPlayer.prototype.getBestMove = function() {
         min = c;
         move = notLoseMoves[i];
       }
-      return move;
     }
+    return move;
   } else return (bestLoseMove ? bestLoseMove : last);
 };
 
