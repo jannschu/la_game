@@ -111,7 +111,7 @@ LaGameAiPlayer.prototype.getBestMove = function() {
     var move, c;
     for (var i = 0; i < notLoseMoves.length; ++i) {
       c = notLoseMoves[i].getEmptyLs(oppPlayer).length;
-      if (c < min) {
+      if (c < min || (c == min && Math.random() < 0.6)) {
         min = c;
         move = notLoseMoves[i];
       }
@@ -150,7 +150,7 @@ LaGameAiPlayer.prototype.getMovesFor = function(field, player) {
     moves.push(lField)
     var emptyNs = lField.getEmptyNs();
     var retField;
-    for (j = 0; j < emptyNs.length; ++j) {
+    for (var j = 0; j < emptyNs.length; ++j) {
       retField = lField.copy();
       retField.nPieces[0] = new NPiece(emptyNs[j], retField.nPieces[0].nid);
       moves.push(retField);
