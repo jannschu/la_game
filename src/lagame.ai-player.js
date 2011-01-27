@@ -25,6 +25,8 @@ function LaGameAiPlayer(playerNumber, gui, logic) {
   this.endMoveCallback = null;
   
   this.bestMove = null;
+  
+  this.lastMoves = [];
 }
 
 LaGameAiPlayer.prototype.startMoving = function(l, neutral, callback) {
@@ -108,15 +110,24 @@ LaGameAiPlayer.prototype.getBestMove = function() {
     return bestWinMove;
   } else if (notLoseMoves.length > 0) {
     var min = Infinity;
-    var move, c;
+    var move = undefined;
+    var hash;
     for (var i = 0; i < notLoseMoves.length; ++i) {
-      c = notLoseMoves[i].getEmptyLs(oppPlayer).length;
-      if (c < min || (c == min && Math.random() < 0.6)) {
-        min = c;
+      hash = notLoseMoves[i].hashCode();
+      if (this.lastMoves.indexOf(hash) != -1) continue;
+      var oppMoves = notLoseMoves[i].getEmptyLs(oppPlayer).length;
+      if (oppMoves < min) {
         move = notLoseMoves[i];
+        min = oppMoves;
       }
     }
-    return move;
+    if (this.lastMoves.length > 15) { this.lastMoves.shift(); } 
+    if (!move) {
+      return notLoseMoves[Math.round(Math.random() * (notLoseMoves.length - 1))];
+    } else {
+      this.lastMoves.push(hash);
+      return move;
+    }
   } else return (bestLoseMove ? bestLoseMove : last);
 };
 
