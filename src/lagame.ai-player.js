@@ -116,7 +116,8 @@ LaGameAiPlayer.prototype.getBestMove = function() {
       hash = notLoseMoves[i].hashCode();
       if (this.lastMoves.indexOf(hash) == -1) {
         var oppMoves = notLoseMoves[i].getEmptyLs(oppPlayer).length;
-        if (oppMoves < min) {
+        var diff = Math.abs(oppMoves - 3);
+        if (diff < min || diff == min && Math.random() > 0.5) {
           move = notLoseMoves[i];
           moveHash = hash;
           min = oppMoves;
