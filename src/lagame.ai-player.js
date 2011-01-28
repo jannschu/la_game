@@ -110,22 +110,24 @@ LaGameAiPlayer.prototype.getBestMove = function() {
     return bestWinMove;
   } else if (notLoseMoves.length > 0) {
     var min = Infinity;
-    var move = undefined;
+    var move, moveHash;
     var hash;
     for (var i = 0; i < notLoseMoves.length; ++i) {
       hash = notLoseMoves[i].hashCode();
-      if (this.lastMoves.indexOf(hash) != -1) continue;
-      var oppMoves = notLoseMoves[i].getEmptyLs(oppPlayer).length;
-      if (oppMoves < min) {
-        move = notLoseMoves[i];
-        min = oppMoves;
+      if (this.lastMoves.indexOf(hash) == -1) {
+        var oppMoves = notLoseMoves[i].getEmptyLs(oppPlayer).length;
+        if (oppMoves < min) {
+          move = notLoseMoves[i];
+          moveHash = hash;
+          min = oppMoves;
+        }
       }
     }
-    if (this.lastMoves.length > 15) { this.lastMoves.shift(); } 
+    if (this.lastMoves.length > 20) { this.lastMoves.shift(); } 
     if (!move) {
       return notLoseMoves[Math.round(Math.random() * (notLoseMoves.length - 1))];
     } else {
-      this.lastMoves.push(hash);
+      this.lastMoves.push(moveHash);
       return move;
     }
   } else return (bestLoseMove ? bestLoseMove : last);
