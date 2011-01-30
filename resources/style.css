@@ -69,6 +69,13 @@ a:visited {
 #gplLogo {
    display: block;
    text-align: right;
+   margin: 0;
+}
+
+#moveStats #movesLeft {
+  color: #003C05;
+  font-size: 1.3em;
+  text-decoration: underline;
 }
 
 #gplLogo img {

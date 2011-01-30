@@ -44,6 +44,7 @@
       var canvas = document.getElementById('laGameCanvas');
       
       var gui = new LaGameGUI(canvas, playerLabel, nextPlayer, moveStats);
+      gui.setMovesLeft(4);
       var logic = new LaGameLogic(gui, playerInput[0], playerInput[1]);
       currentGame = logic;
       

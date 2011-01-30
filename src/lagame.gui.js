@@ -56,7 +56,7 @@ LaGameGUI.prototype.updateMoveStat = function() {
     (count == 1 ? "Zug" : "Züge");
   this.moveStats.innerHTML = str;
   if (this.movesLeft !== false) {
-    this.moveStats.innerHTML += " (Maximal <strong>" + this.movesLeft + "</strong> noch)";
+    this.moveStats.innerHTML += " <span id=\"movesLeft\">(Maximal <strong>" + this.movesLeft + "</strong> noch &#9786;)</span>";
   }
 };
 
